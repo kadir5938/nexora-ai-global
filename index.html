@@ -1,1 +1,130 @@
 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXORA AI GLOBAL</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111f;color:white;font-family:Arial,sans-serif}
+header{padding:20px;background:#0c1b30;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:25px;font-weight:bold;color:#38d9ff}
+.logo span{color:white}
+nav a{color:white;text-decoration:none;margin:8px;font-size:14px}
+.hero{text-align:center;padding:65px 18px;background:linear-gradient(135deg,#102b50,#07111f)}
+.hero h1{font-size:38px;margin:10px}
+.hero h1 span{color:#38d9ff}
+.hero p{color:#b8c9df;line-height:1.7}
+.btn{background:#16bde8;color:#04111e;border:0;padding:14px 22px;border-radius:9px;font-weight:bold;cursor:pointer}
+section{padding:30px 18px;max-width:1100px;margin:auto}
+h2{color:#38d9ff}
+.search{width:100%;padding:15px;border-radius:9px;border:1px solid #294665;background:#10243c;color:white;margin:12px 0}
+.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.category{background:#112944;padding:22px;border-radius:12px;text-align:center}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
+.product{background:#10243c;border:1px solid #24415f;padding:15px;border-radius:12px;text-align:center}
+.product .emoji{font-size:42px}
+.product h3{font-size:16px}
+.product p{color:#a9bfd5;font-size:13px}
+.product button{width:100%;padding:11px;background:#16bde8;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
+.assistant{background:linear-gradient(120deg,#12375b,#10243c);padding:25px;border-radius:15px;text-align:center}
+footer{text-align:center;padding:30px;color:#8da5bd;background:#091625;margin-top:35px}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">NEXORA <span>AI GLOBAL</span></div>
+<nav>
+<a href="#anasayfa">Ana Sayfa</a>
+<a href="#urunler">Ürünler</a>
+<a href="#asistan">AI Asistan</a>
+<a href="#sepet">Sepet 🛒 <b id="count">0</b></a>
+</nav>
+</header>
+
+<div class="hero" id="anasayfa">
+<h1>Gelecek <span>NEXORA</span> ile Başlıyor</h1>
+<p>Yapay zekâ destekli küresel alışveriş ve dijital ticaret platformu.</p>
+<button class="btn" onclick="document.getElementById('urunler').scrollIntoView({behavior:'smooth'})">Alışverişe Başla</button>
+</div>
+
+<section>
+<h2>🌍 NEXORA Dünyası</h2>
+<div class="categories">
+<div class="category">💻<h3>Dijital Ürünler</h3><p>Yazılım, tasarım ve dijital çözümler</p></div>
+<div class="category">📦<h3>Fiziksel Ürünler</h3><p>Günlük yaşam ve teknoloji ürünleri</p></div>
+</div>
+</section>
+
+<section id="urunler">
+<h2>🛍️ Ürün Mağazası</h2>
+<input class="search" id="search" placeholder="Ürün ara..." oninput="filterProducts()">
+<div class="products" id="products">
+<div class="product" data-name="akıllı saat">
+<div class="emoji">⌚</div>
+<h3>Akıllı Saat</h3><p>Teknoloji kategorisi</p>
+<button onclick="addCart('Akıllı Saat')">Sepete Ekle</button>
+</div>
+<div class="product" data-name="kulaklık">
+<div class="emoji">🎧</div>
+<h3>Bluetooth Kulaklık</h3><p>Elektronik kategorisi</p>
+<button onclick="addCart('Bluetooth Kulaklık')">Sepete Ekle</button>
+</div>
+<div class="product" data-name="dijital tasarım">
+<div class="emoji">🎨</div>
+<h3>Dijital Tasarım</h3><p>Dijital ürün</p>
+<button onclick="addCart('Dijital Tasarım')">Sepete Ekle</button>
+</div>
+<div class="product" data-name="yazılım paketi">
+<div class="emoji">💻</div>
+<h3>Yazılım Paketi</h3><p>Dijital ürün</p>
+<button onclick="addCart('Yazılım Paketi')">Sepete Ekle</button>
+</div>
+</div>
+</section>
+
+<section id="asistan">
+<div class="assistant">
+<h2>🤖 NEXORA AI ASİSTAN</h2>
+<p>Akıllı alışveriş deneyimi için NEXORA yanında!</p>
+<input class="search" id="question" placeholder="Nasıl yardımcı olabilirim?">
+<button class="btn" onclick="askAI()">Gönder</button>
+<p id="answer">Merhaba! NEXORA'ya hoş geldin.</p>
+</div>
+</section>
+
+<section id="sepet">
+<h2>🛒 Alışveriş Sepetim</h2>
+<div id="cart">Sepetiniz henüz boş.</div>
+</section>
+
+<footer>
+<h3>NEXORA AI GLOBAL</h3>
+<p>Akıllı ticaretin küresel adresi.</p>
+<p>© 2026 NEXORA. Tüm hakları saklıdır.</p>
+</footer>
+
+<script>
+let cart=[];
+function addCart(name){
+cart.push(name);
+document.getElementById('count').textContent=cart.length;
+document.getElementById('cart').innerHTML=cart.map(x=>'📦 '+x).join('<br>');
+}
+function filterProducts(){
+let q=document.getElementById('search').value.toLowerCase();
+document.querySelectorAll('.product').forEach(p=>{
+p.style.display=p.dataset.name.includes(q)?'block':'none';
+});
+}
+function askAI(){
+let q=document.getElementById('question').value;
+document.getElementById('answer').textContent=
+q ? 'NEXORA AI: Sorunuz alındı. Gerçek yapay zekâ bağlantısı kurulduğunda size akıllı yanıt vereceğim.' : 'Lütfen bir soru yazın.';
+}
+</script>
+</body>
+  </html>
+
