@@ -4,33 +4,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEXORA AI GLOBAL Marketplace</title>
+<title>NEXORA AI GLOBAL</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#07111f;color:white;font-family:Arial}
+body{margin:0;background:#07111f;color:white;font-family:Arial,sans-serif}
 header{background:#0d2038;padding:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .logo{font-size:23px;font-weight:bold;color:#38d9ff}
 nav{display:flex;gap:15px;flex-wrap:wrap}
 a{color:white;text-decoration:none}
 .hero{text-align:center;padding:48px 15px;background:linear-gradient(130deg,#123c69,#07111f)}
 .hero h1{font-size:34px}
-.hero span{color:#38d9ff}
-button{background:#16bde8;color:#04111e;border:0;border-radius:8px;padding:12px 17px;font-weight:bold;cursor:pointer}
+.hero span,h2{color:#38d9ff}
+button{background:#16bde8;color:#04111e;border:0;border-radius:8px;padding:12px 17px;font-weight:bold;cursor:pointer;margin:4px}
+.secondary{background:#294563;color:white}
+.danger{background:#a83245;color:white}
 section{max-width:1050px;margin:auto;padding:22px 16px}
-.panel{background:#10243c;border:1px solid #294563;padding:18px;border-radius:13px;margin:15px 0}
+.panel,.product{background:#10243c;border:1px solid #294563;padding:18px;border-radius:13px;margin:15px 0}
 input,textarea,select{width:100%;padding:13px;margin:7px 0 14px;background:#091a2d;color:white;border:1px solid #35516e;border-radius:8px}
 label{font-size:14px;color:#bcd0e5}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.product{background:#10243c;padding:17px;border-radius:12px;border:1px solid #294563}
-.product .emoji{font-size:38px}
-.product h3{margin:10px 0}
-.price{color:#38d9ff;font-size:21px;font-weight:bold}
-.small{font-size:13px;color:#a8bfd8}
 .stat{background:#102c49;padding:18px;border-radius:12px}
 .stat strong{font-size:25px;color:#38d9ff}
-.hidden{display:none}
-h2{color:#38d9ff}
+.price{color:#38d9ff;font-size:21px;font-weight:bold}
+.small{font-size:13px;color:#a8bfd8}
+.hidden{display:none!important}
 footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
+#message{padding:10px;border-radius:8px}
+.product img{width:100%;height:160px;object-fit:cover;border-radius:8px}
 </style>
 </head>
 <body>
@@ -40,6 +41,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <nav>
 <a href="#home">Ana Sayfa</a>
 <a href="#market">Pazaryeri</a>
+<a href="#account">Üyelik</a>
 <a href="#seller">Mağaza Aç</a>
 <a href="#dashboard">Panelim</a>
 </nav>
@@ -49,6 +51,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <h1>Gelecek <span>NEXORA</span> ile Başlıyor</h1>
 <p>Herkes için küresel dijital ticaret platformu.</p>
 <button onclick="go('seller')">Ücretsiz Mağaza Aç</button>
+<button class="secondary" onclick="go('market')">Ürünleri Keşfet</button>
 </div>
 
 <section>
@@ -60,16 +63,37 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 </div>
 </section>
 
+<section id="account">
+<h2>👤 Üyelik ve Giriş</h2>
+<div class="panel">
+<div id="authForms">
+<label>Adınız</label>
+<input id="fullName" placeholder="Adınız">
+
+<label>E-posta</label>
+<input id="authEmail" type="email" placeholder="E-posta adresiniz">
+
+<label>Şifre</label>
+<input id="authPassword" type="password" minlength="6" placeholder="En az 6 karakter">
+
+<button onclick="signUp()">Üye Ol</button>
+<button class="secondary" onclick="signIn()">Giriş Yap</button>
+</div>
+<div id="loggedIn" class="hidden">
+<p id="userEmail"></p>
+<button class="danger" onclick="signOutUser()">Güvenli Çıkış</button>
+</div>
+<p id="message" class="small"></p>
+</div>
+</section>
+
 <section id="seller">
 <h2>🏪 Mağazanı Oluştur</h2>
 <div class="panel">
 <form id="sellerForm">
 <label>Mağaza adı</label>
 <input id="storeName" required placeholder="Örn. Kadir Teknoloji">
-<label>Satıcı adı</label>
-<input id="owner" required placeholder="Adınız">
-<label>E-posta</label>
-<input id="email" type="email" required placeholder="E-posta adresiniz">
+
 <label>Mağaza kategorisi</label>
 <select id="category">
 <option>Teknoloji</option>
@@ -78,6 +102,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <option>Ev ve Yaşam</option>
 <option>Diğer</option>
 </select>
+
 <button type="submit">Mağazamı Oluştur</button>
 </form>
 <p id="sellerMessage" class="small"></p>
@@ -90,17 +115,25 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <form id="productForm">
 <label>Ürün adı</label>
 <input id="productName" required placeholder="Ürün adı">
+
 <label>Fiyat (TL)</label>
 <input id="productPrice" type="number" min="1" required placeholder="Örn. 500">
+
 <label>Ürün açıklaması</label>
 <textarea id="productDescription" required placeholder="Ürün hakkında bilgi"></textarea>
+
 <label>Ürün türü</label>
 <select id="productType">
-<option>Fiziksel Ürün</option>
-<option>Dijital Ürün</option>
+<option value="Fiziksel Ürün">Fiziksel Ürün</option>
+<option value="Dijital Ürün">Dijital Ürün</option>
 </select>
+
+<label>Ürün görsel bağlantısı (isteğe bağlı)</label>
+<input id="productImage" type="url" placeholder="https://...">
+
 <button type="submit">Ürünü Yayınla</button>
 </form>
+<p id="productMessage" class="small"></p>
 </div>
 </section>
 
@@ -111,22 +144,21 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 </section>
 
 <section id="dashboard">
-<h2>📊 Satıcı ve Yönetici Paneli</h2>
+<h2>📊 Satıcı Panelim</h2>
 <div class="grid">
 <div class="stat"><p>Ürün sayısı</p><strong id="productCount">0</strong></div>
-<div class="stat"><p>Demo satış toplamı</p><strong id="sales">0 TL</strong></div>
-<div class="stat"><p>NEXORA komisyonu</p><strong id="commission">0 TL</strong></div>
+<div class="stat"><p>Mağaza durumu</p><strong id="storeStatus">Yok</strong></div>
+<div class="stat"><p>Komisyon oranı</p><strong>%10</strong></div>
 </div>
+
 <div class="panel">
-<h3>🧮 Komisyon Hesaplama</h3>
-<p class="small">Örnek komisyon oranı: %10</p>
-<input type="number" id="calcPrice" placeholder="Satış fiyatı (TL)">
-<button onclick="calculate()">Hesapla</button>
-<p id="calcResult"></p>
+<h3>🏪 Mağaza bilgilerim</h3>
+<div id="myStore">Henüz giriş yapılmadı.</div>
 </div>
+
 <div class="panel">
-<h3>Mağaza bilgilerim</h3>
-<div id="myStore">Henüz mağaza oluşturulmadı.</div>
+<h3>📦 Ürünlerim</h3>
+<div id="myProducts" class="grid"></div>
 </div>
 </section>
 
@@ -137,108 +169,349 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 </footer>
 
 <script>
-const KEY="nexora_market_v1";
-let data=JSON.parse(localStorage.getItem(KEY)||'{"store":null,"products":[],"sales":0}');
-const commissionRate=0.10;
+const SUPABASE_URL = "https://udlqaozwbvnecbcrlvxq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TBNKOEkqddjxV2yNvKZm7A_N1KdpQ-S";
 
-function save(){
-localStorage.setItem(KEY,JSON.stringify(data));
-renderProducts();
-updateDashboard();
-}
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let currentUser = null;
+let myStore = null;
+let allProducts = [];
 
 function go(id){
-document.getElementById(id).scrollIntoView({behavior:"smooth"});
+  document.getElementById(id).scrollIntoView({behavior:"smooth"});
 }
 
-document.getElementById("sellerForm").onsubmit=function(e){
-e.preventDefault();
-data.store={
-name:storeName.value,
-owner:owner.value,
-email:email.value,
-category:category.value
-};
-save();
-sellerMessage.textContent="Mağaza bilgileri bu cihazda demo olarak kaydedildi.";
-document.getElementById("myStore").textContent=data.store.name+" | "+data.store.category;
-};
-
-document.getElementById("productForm").onsubmit=function(e){
-e.preventDefault();
-if(!data.store){
-alert("Önce mağazanızı oluşturun.");
-go("seller");
-return;
+function message(text){
+  document.getElementById("message").textContent = text;
 }
-data.products.push({
-id:Date.now(),
-name:productName.value,
-price:Number(productPrice.value),
-description:productDescription.value,
-type:productType.value,
-store:data.store.name
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+async function signUp(){
+  const name = document.getElementById("fullName").value.trim();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  if(!name || !email || password.length < 6){
+    message("Ad, e-posta ve en az 6 karakterli şifre girin.");
+    return;
+  }
+
+  const {data,error} = await db.auth.signUp({
+    email,
+    password,
+    options:{data:{full_name:name}}
+  });
+
+  if(error){
+    message(error.message);
+    return;
+  }
+
+  if(data.session){
+    message("Üyeliğiniz oluşturuldu!");
+  }else{
+    message("Kayıt oluşturuldu. E-postanıza gelen doğrulama bağlantısına tıklayın.");
+  }
+}
+
+async function signIn(){
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  const {error} = await db.auth.signInWithPassword({
+    email,password
+  });
+
+  if(error){
+    message(error.message);
+    return;
+  }
+
+  message("Giriş başarılı!");
+  await loadUser();
+}
+
+async function signOutUser(){
+  const {error} = await db.auth.signOut();
+  if(error){message(error.message);return;}
+  currentUser = null;
+  myStore = null;
+  updateAccount();
+  updateDashboard();
+  message("Oturum kapatıldı.");
+}
+
+function updateAccount(){
+  const loggedIn = !!currentUser;
+  document.getElementById("authForms").classList.toggle("hidden",loggedIn);
+  document.getElementById("loggedIn").classList.toggle("hidden",!loggedIn);
+  document.getElementById("userEmail").textContent =
+    loggedIn ? "Giriş yapan: " + currentUser.email : "";
+}
+
+async function loadUser(){
+  const {data:{user}} = await db.auth.getUser();
+  currentUser = user;
+  updateAccount();
+
+  if(currentUser){
+    await loadMyStore();
+  }else{
+    myStore = null;
+  }
+
+  await loadProducts();
+  updateDashboard();
+}
+
+async function loadMyStore(){
+  if(!currentUser)return;
+
+  const {data,error} = await db
+    .from("stores")
+    .select("*")
+    .eq("owner_id",currentUser.id)
+    .limit(1)
+    .maybeSingle();
+
+  if(error){
+    message("Mağaza bilgisi alınamadı: " + error.message);
+    return;
+  }
+
+  myStore = data;
+  updateDashboard();
+}
+
+document.getElementById("sellerForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  if(!currentUser){
+    document.getElementById("sellerMessage").textContent =
+      "Önce üyelik oluşturun veya giriş yapın.";
+    go("account");
+    return;
+  }
+
+  if(myStore){
+    document.getElementById("sellerMessage").textContent =
+      "Zaten bir mağazanız var.";
+    return;
+  }
+
+  const store = {
+    owner_id:currentUser.id,
+    name:document.getElementById("storeName").value.trim(),
+    category:document.getElementById("category").value,
+    email:currentUser.email,
+    is_active:true
+  };
+
+  const {data,error} = await db
+    .from("stores")
+    .insert(store)
+    .select()
+    .single();
+
+  if(error){
+    document.getElementById("sellerMessage").textContent =
+      "Mağaza oluşturulamadı: " + error.message;
+    return;
+  }
+
+  myStore = data;
+  document.getElementById("sellerMessage").textContent =
+    "Mağazanız başarıyla oluşturuldu!";
+  e.target.reset();
+  updateDashboard();
 });
-save();
-this.reset();
-alert("Ürün demo pazaryerine eklendi!");
-go("market");
-};
+
+document.getElementById("productForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  if(!currentUser){
+    document.getElementById("productMessage").textContent =
+      "Ürün eklemek için giriş yapmalısınız.";
+    go("account");
+    return;
+  }
+
+  if(!myStore){
+    document.getElementById("productMessage").textContent =
+      "Önce mağazanızı oluşturun.";
+    go("seller");
+    return;
+  }
+
+  const price = Number(document.getElementById("productPrice").value);
+
+  if(!Number.isFinite(price) || price <= 0){
+    document.getElementById("productMessage").textContent =
+      "Geçerli bir fiyat girin.";
+    return;
+  }
+
+  const product = {
+    store_id:myStore.id,
+    name:document.getElementById("productName").value.trim(),
+    description:document.getElementById("productDescription").value.trim(),
+    price:price,
+    product_type:document.getElementById("productType").value,
+    image_url:document.getElementById("productImage").value.trim() || null,
+    status:"aktif",
+    is_active:true
+  };
+
+  const {error} = await db.from("products").insert(product);
+
+  if(error){
+    document.getElementById("productMessage").textContent =
+      "Ürün eklenemedi: " + error.message;
+    return;
+  }
+
+  document.getElementById("productMessage").textContent =
+    "Ürününüz pazaryerine eklendi!";
+  e.target.reset();
+  await loadProducts();
+  updateDashboard();
+  go("market");
+});
+
+async function loadProducts(){
+  const {data,error} = await db
+    .from("products")
+    .select("*")
+    .eq("status","aktif")
+    .eq("is_active",true)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    document.getElementById("products").textContent =
+      "Ürünler yüklenemedi: " + error.message;
+    return;
+  }
+
+  allProducts = data || [];
+  renderProducts();
+}
 
 function renderProducts(){
-const q=document.getElementById("search").value.toLowerCase();
-const area=document.getElementById("products");
-const items=data.products.filter(p=>p.name.toLowerCase().includes(q));
-area.innerHTML=items.length?items.map(p=>`
-<div class="product">
-<div class="emoji">${p.type==="Dijital Ürün"?"💻":"📦"}</div>
-<h3>${escapeHTML(p.name)}</h3>
-<p class="small">${escapeHTML(p.description)}</p>
-<p class="small">${escapeHTML(p.store)}</p>
-<div class="price">${p.price.toLocaleString("tr-TR")} TL</div>
-<button onclick="demoBuy(${p.id})">Demo Satın Al</button>
-</div>`).join(""):"Henüz ürün yok. İlk ürününü ekle!";
+  const q = document.getElementById("search").value.toLocaleLowerCase("tr");
+  const filtered = allProducts.filter(p =>
+    String(p.name).toLocaleLowerCase("tr").includes(q) ||
+    String(p.description || "").toLocaleLowerCase("tr").includes(q)
+  );
+
+  const area = document.getElementById("products");
+
+  if(!filtered.length){
+    area.innerHTML = "<p class='small'>Henüz yayınlanmış ürün yok. İlk ürününü ekle!</p>";
+    return;
+  }
+
+  area.innerHTML = filtered.map(p=>`
+    <div class="product">
+      ${p.image_url
+        ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli" onerror="this.style.display='none'">`
+        : `<div class="emoji" style="font-size:38px">📦</div>`}
+      <h3>${escapeHTML(p.name)}</h3>
+      <p class="small">${escapeHTML(p.description)}</p>
+      <div class="price">${Number(p.price).toLocaleString("tr-TR")} TL</div>
+      <p class="small">${escapeHTML(p.product_type)}</p>
+      <p class="small">Mağaza: ${escapeHTML(p.store_id)}</p>
+    </div>
+  `).join("");
 }
 
-function escapeHTML(s){
-return String(s).replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-}[c]));
+async function loadMyProducts(){
+  const area = document.getElementById("myProducts");
+
+  if(!currentUser || !myStore){
+    area.textContent = "Mağazanızdaki ürünleri görmek için mağaza açın.";
+    document.getElementById("productCount").textContent = "0";
+    return;
+  }
+
+  const {data,error} = await db
+    .from("products")
+    .select("*")
+    .eq("store_id",myStore.id)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    area.textContent = "Ürünler alınamadı: " + error.message;
+    return;
+  }
+
+  document.getElementById("productCount").textContent = data.length;
+
+  if(!data.length){
+    area.textContent = "Henüz ürün eklemediniz.";
+    return;
+  }
+
+  area.innerHTML = data.map(p=>`
+    <div class="product">
+      <h3>${escapeHTML(p.name)}</h3>
+      <p class="price">${Number(p.price).toLocaleString("tr-TR")} TL</p>
+      <p class="small">Durum: ${escapeHTML(p.status)}</p>
+      <button class="danger" onclick="deleteProduct('${escapeHTML(p.id)}')">Ürünü Sil</button>
+    </div>
+  `).join("");
 }
 
-function demoBuy(id){
-const p=data.products.find(x=>x.id===id);
-if(!p)return;
-if(!confirm(p.name+" için demo satış kaydı oluşturulsun mu?"))return;
-data.sales+=p.price;
-save();
-alert("Demo satış kaydedildi. Gerçek ödeme alınmadı.");
+async function deleteProduct(id){
+  if(!currentUser || !myStore)return;
+  if(!confirm("Bu ürünü silmek istiyor musunuz?"))return;
+
+  const {error} = await db
+    .from("products")
+    .delete()
+    .eq("id",id)
+    .eq("store_id",myStore.id);
+
+  if(error){
+    alert("Silinemedi: " + error.message);
+    return;
+  }
+
+  alert("Ürün silindi.");
+  await loadProducts();
+  await loadMyProducts();
 }
 
 function updateDashboard(){
-document.getElementById("productCount").textContent=data.products.length;
-document.getElementById("sales").textContent=data.sales.toLocaleString("tr-TR")+" TL";
-document.getElementById("commission").textContent=
-(data.sales*commissionRate).toLocaleString("tr-TR")+" TL";
-if(data.store){
-document.getElementById("myStore").textContent=
-data.store.name+" | "+data.store.owner+" | "+data.store.category;
-}
+  document.getElementById("storeStatus").textContent =
+    myStore ? "Aktif" : "Yok";
+
+  document.getElementById("myStore").textContent =
+    myStore
+      ? myStore.name + " | " + myStore.category
+      : "Henüz mağaza oluşturulmadı.";
+
+  loadMyProducts();
 }
 
-function calculate(){
-let p=Number(document.getElementById("calcPrice").value);
-if(p<=0){
-calcResult.textContent="Geçerli bir fiyat girin.";
-return;
-}
-let fee=p*commissionRate;
-calcResult.textContent="NEXORA payı: "+fee.toFixed(2)+
-" TL | Satıcı payı: "+(p-fee).toFixed(2)+" TL";
+db.auth.onAuthStateChange((_event,session)=>{
+  setTimeout(()=>loadUser(),0);
+});
+
+async function start(){
+  await loadUser();
 }
 
-renderProducts();
-updateDashboard();
+start();
 </script>
 </body>
-</html>
+  </html>
+  
