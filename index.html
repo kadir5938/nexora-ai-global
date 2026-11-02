@@ -3,128 +3,242 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXORA AI GLOBAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXORA AI GLOBAL Marketplace</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#07111f;color:white;font-family:Arial,sans-serif}
-header{padding:20px;background:#0c1b30;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.logo{font-size:25px;font-weight:bold;color:#38d9ff}
-.logo span{color:white}
-nav a{color:white;text-decoration:none;margin:8px;font-size:14px}
-.hero{text-align:center;padding:65px 18px;background:linear-gradient(135deg,#102b50,#07111f)}
-.hero h1{font-size:38px;margin:10px}
-.hero h1 span{color:#38d9ff}
-.hero p{color:#b8c9df;line-height:1.7}
-.btn{background:#16bde8;color:#04111e;border:0;padding:14px 22px;border-radius:9px;font-weight:bold;cursor:pointer}
-section{padding:30px 18px;max-width:1100px;margin:auto}
+body{margin:0;background:#07111f;color:white;font-family:Arial}
+header{background:#0d2038;padding:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:23px;font-weight:bold;color:#38d9ff}
+nav{display:flex;gap:15px;flex-wrap:wrap}
+a{color:white;text-decoration:none}
+.hero{text-align:center;padding:48px 15px;background:linear-gradient(130deg,#123c69,#07111f)}
+.hero h1{font-size:34px}
+.hero span{color:#38d9ff}
+button{background:#16bde8;color:#04111e;border:0;border-radius:8px;padding:12px 17px;font-weight:bold;cursor:pointer}
+section{max-width:1050px;margin:auto;padding:22px 16px}
+.panel{background:#10243c;border:1px solid #294563;padding:18px;border-radius:13px;margin:15px 0}
+input,textarea,select{width:100%;padding:13px;margin:7px 0 14px;background:#091a2d;color:white;border:1px solid #35516e;border-radius:8px}
+label{font-size:14px;color:#bcd0e5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.product{background:#10243c;padding:17px;border-radius:12px;border:1px solid #294563}
+.product .emoji{font-size:38px}
+.product h3{margin:10px 0}
+.price{color:#38d9ff;font-size:21px;font-weight:bold}
+.small{font-size:13px;color:#a8bfd8}
+.stat{background:#102c49;padding:18px;border-radius:12px}
+.stat strong{font-size:25px;color:#38d9ff}
+.hidden{display:none}
 h2{color:#38d9ff}
-.search{width:100%;padding:15px;border-radius:9px;border:1px solid #294665;background:#10243c;color:white;margin:12px 0}
-.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.category{background:#112944;padding:22px;border-radius:12px;text-align:center}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
-.product{background:#10243c;border:1px solid #24415f;padding:15px;border-radius:12px;text-align:center}
-.product .emoji{font-size:42px}
-.product h3{font-size:16px}
-.product p{color:#a9bfd5;font-size:13px}
-.product button{width:100%;padding:11px;background:#16bde8;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
-.assistant{background:linear-gradient(120deg,#12375b,#10243c);padding:25px;border-radius:15px;text-align:center}
-footer{text-align:center;padding:30px;color:#8da5bd;background:#091625;margin-top:35px}
+footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 </style>
 </head>
 <body>
 
 <header>
-<div class="logo">NEXORA <span>AI GLOBAL</span></div>
+<div class="logo">NEXORA AI GLOBAL</div>
 <nav>
-<a href="#anasayfa">Ana Sayfa</a>
-<a href="#urunler">Ürünler</a>
-<a href="#asistan">AI Asistan</a>
-<a href="#sepet">Sepet 🛒 <b id="count">0</b></a>
+<a href="#home">Ana Sayfa</a>
+<a href="#market">Pazaryeri</a>
+<a href="#seller">Mağaza Aç</a>
+<a href="#dashboard">Panelim</a>
 </nav>
 </header>
 
-<div class="hero" id="anasayfa">
+<div class="hero" id="home">
 <h1>Gelecek <span>NEXORA</span> ile Başlıyor</h1>
-<p>Yapay zekâ destekli küresel alışveriş ve dijital ticaret platformu.</p>
-<button class="btn" onclick="document.getElementById('urunler').scrollIntoView({behavior:'smooth'})">Alışverişe Başla</button>
+<p>Herkes için küresel dijital ticaret platformu.</p>
+<button onclick="go('seller')">Ücretsiz Mağaza Aç</button>
 </div>
 
 <section>
-<h2>🌍 NEXORA Dünyası</h2>
-<div class="categories">
-<div class="category">💻<h3>Dijital Ürünler</h3><p>Yazılım, tasarım ve dijital çözümler</p></div>
-<div class="category">📦<h3>Fiziksel Ürünler</h3><p>Günlük yaşam ve teknoloji ürünleri</p></div>
+<h2>🌍 NEXORA Marketplace</h2>
+<div class="grid">
+<div class="stat">🏪<h3>Herkes Satıcı Olabilir</h3><p class="small">Kendi mağazanı oluştur.</p></div>
+<div class="stat">🌐<h3>Küresel Ticaret</h3><p class="small">Dijital ve fiziksel ürünler.</p></div>
+<div class="stat">🤖<h3>AI Destekli</h3><p class="small">Akıllı ticaret deneyimi.</p></div>
 </div>
 </section>
 
-<section id="urunler">
-<h2>🛍️ Ürün Mağazası</h2>
-<input class="search" id="search" placeholder="Ürün ara..." oninput="filterProducts()">
-<div class="products" id="products">
-<div class="product" data-name="akıllı saat">
-<div class="emoji">⌚</div>
-<h3>Akıllı Saat</h3><p>Teknoloji kategorisi</p>
-<button onclick="addCart('Akıllı Saat')">Sepete Ekle</button>
-</div>
-<div class="product" data-name="kulaklık">
-<div class="emoji">🎧</div>
-<h3>Bluetooth Kulaklık</h3><p>Elektronik kategorisi</p>
-<button onclick="addCart('Bluetooth Kulaklık')">Sepete Ekle</button>
-</div>
-<div class="product" data-name="dijital tasarım">
-<div class="emoji">🎨</div>
-<h3>Dijital Tasarım</h3><p>Dijital ürün</p>
-<button onclick="addCart('Dijital Tasarım')">Sepete Ekle</button>
-</div>
-<div class="product" data-name="yazılım paketi">
-<div class="emoji">💻</div>
-<h3>Yazılım Paketi</h3><p>Dijital ürün</p>
-<button onclick="addCart('Yazılım Paketi')">Sepete Ekle</button>
-</div>
+<section id="seller">
+<h2>🏪 Mağazanı Oluştur</h2>
+<div class="panel">
+<form id="sellerForm">
+<label>Mağaza adı</label>
+<input id="storeName" required placeholder="Örn. Kadir Teknoloji">
+<label>Satıcı adı</label>
+<input id="owner" required placeholder="Adınız">
+<label>E-posta</label>
+<input id="email" type="email" required placeholder="E-posta adresiniz">
+<label>Mağaza kategorisi</label>
+<select id="category">
+<option>Teknoloji</option>
+<option>Giyim</option>
+<option>Dijital Ürünler</option>
+<option>Ev ve Yaşam</option>
+<option>Diğer</option>
+</select>
+<button type="submit">Mağazamı Oluştur</button>
+</form>
+<p id="sellerMessage" class="small"></p>
 </div>
 </section>
 
-<section id="asistan">
-<div class="assistant">
-<h2>🤖 NEXORA AI ASİSTAN</h2>
-<p>Akıllı alışveriş deneyimi için NEXORA yanında!</p>
-<input class="search" id="question" placeholder="Nasıl yardımcı olabilirim?">
-<button class="btn" onclick="askAI()">Gönder</button>
-<p id="answer">Merhaba! NEXORA'ya hoş geldin.</p>
+<section id="addProduct">
+<h2>📦 Ürün Ekle</h2>
+<div class="panel">
+<form id="productForm">
+<label>Ürün adı</label>
+<input id="productName" required placeholder="Ürün adı">
+<label>Fiyat (TL)</label>
+<input id="productPrice" type="number" min="1" required placeholder="Örn. 500">
+<label>Ürün açıklaması</label>
+<textarea id="productDescription" required placeholder="Ürün hakkında bilgi"></textarea>
+<label>Ürün türü</label>
+<select id="productType">
+<option>Fiziksel Ürün</option>
+<option>Dijital Ürün</option>
+</select>
+<button type="submit">Ürünü Yayınla</button>
+</form>
 </div>
 </section>
 
-<section id="sepet">
-<h2>🛒 Alışveriş Sepetim</h2>
-<div id="cart">Sepetiniz henüz boş.</div>
+<section id="market">
+<h2>🛍️ NEXORA Ürün Pazaryeri</h2>
+<input id="search" placeholder="Ürün ara..." oninput="renderProducts()">
+<div id="products" class="grid"></div>
+</section>
+
+<section id="dashboard">
+<h2>📊 Satıcı ve Yönetici Paneli</h2>
+<div class="grid">
+<div class="stat"><p>Ürün sayısı</p><strong id="productCount">0</strong></div>
+<div class="stat"><p>Demo satış toplamı</p><strong id="sales">0 TL</strong></div>
+<div class="stat"><p>NEXORA komisyonu</p><strong id="commission">0 TL</strong></div>
+</div>
+<div class="panel">
+<h3>🧮 Komisyon Hesaplama</h3>
+<p class="small">Örnek komisyon oranı: %10</p>
+<input type="number" id="calcPrice" placeholder="Satış fiyatı (TL)">
+<button onclick="calculate()">Hesapla</button>
+<p id="calcResult"></p>
+</div>
+<div class="panel">
+<h3>Mağaza bilgilerim</h3>
+<div id="myStore">Henüz mağaza oluşturulmadı.</div>
+</div>
 </section>
 
 <footer>
 <h3>NEXORA AI GLOBAL</h3>
 <p>Akıllı ticaretin küresel adresi.</p>
-<p>© 2026 NEXORA. Tüm hakları saklıdır.</p>
+<p>© 2026 NEXORA</p>
 </footer>
 
 <script>
-let cart=[];
-function addCart(name){
-cart.push(name);
-document.getElementById('count').textContent=cart.length;
-document.getElementById('cart').innerHTML=cart.map(x=>'📦 '+x).join('<br>');
+const KEY="nexora_market_v1";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"store":null,"products":[],"sales":0}');
+const commissionRate=0.10;
+
+function save(){
+localStorage.setItem(KEY,JSON.stringify(data));
+renderProducts();
+updateDashboard();
 }
-function filterProducts(){
-let q=document.getElementById('search').value.toLowerCase();
-document.querySelectorAll('.product').forEach(p=>{
-p.style.display=p.dataset.name.includes(q)?'block':'none';
+
+function go(id){
+document.getElementById(id).scrollIntoView({behavior:"smooth"});
+}
+
+document.getElementById("sellerForm").onsubmit=function(e){
+e.preventDefault();
+data.store={
+name:storeName.value,
+owner:owner.value,
+email:email.value,
+category:category.value
+};
+save();
+sellerMessage.textContent="Mağaza bilgileri bu cihazda demo olarak kaydedildi.";
+document.getElementById("myStore").textContent=data.store.name+" | "+data.store.category;
+};
+
+document.getElementById("productForm").onsubmit=function(e){
+e.preventDefault();
+if(!data.store){
+alert("Önce mağazanızı oluşturun.");
+go("seller");
+return;
+}
+data.products.push({
+id:Date.now(),
+name:productName.value,
+price:Number(productPrice.value),
+description:productDescription.value,
+type:productType.value,
+store:data.store.name
 });
+save();
+this.reset();
+alert("Ürün demo pazaryerine eklendi!");
+go("market");
+};
+
+function renderProducts(){
+const q=document.getElementById("search").value.toLowerCase();
+const area=document.getElementById("products");
+const items=data.products.filter(p=>p.name.toLowerCase().includes(q));
+area.innerHTML=items.length?items.map(p=>`
+<div class="product">
+<div class="emoji">${p.type==="Dijital Ürün"?"💻":"📦"}</div>
+<h3>${escapeHTML(p.name)}</h3>
+<p class="small">${escapeHTML(p.description)}</p>
+<p class="small">${escapeHTML(p.store)}</p>
+<div class="price">${p.price.toLocaleString("tr-TR")} TL</div>
+<button onclick="demoBuy(${p.id})">Demo Satın Al</button>
+</div>`).join(""):"Henüz ürün yok. İlk ürününü ekle!";
 }
-function askAI(){
-let q=document.getElementById('question').value;
-document.getElementById('answer').textContent=
-q ? 'NEXORA AI: Sorunuz alındı. Gerçek yapay zekâ bağlantısı kurulduğunda size akıllı yanıt vereceğim.' : 'Lütfen bir soru yazın.';
+
+function escapeHTML(s){
+return String(s).replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
 }
+
+function demoBuy(id){
+const p=data.products.find(x=>x.id===id);
+if(!p)return;
+if(!confirm(p.name+" için demo satış kaydı oluşturulsun mu?"))return;
+data.sales+=p.price;
+save();
+alert("Demo satış kaydedildi. Gerçek ödeme alınmadı.");
+}
+
+function updateDashboard(){
+document.getElementById("productCount").textContent=data.products.length;
+document.getElementById("sales").textContent=data.sales.toLocaleString("tr-TR")+" TL";
+document.getElementById("commission").textContent=
+(data.sales*commissionRate).toLocaleString("tr-TR")+" TL";
+if(data.store){
+document.getElementById("myStore").textContent=
+data.store.name+" | "+data.store.owner+" | "+data.store.category;
+}
+}
+
+function calculate(){
+let p=Number(document.getElementById("calcPrice").value);
+if(p<=0){
+calcResult.textContent="Geçerli bir fiyat girin.";
+return;
+}
+let fee=p*commissionRate;
+calcResult.textContent="NEXORA payı: "+fee.toFixed(2)+
+" TL | Satıcı payı: "+(p-fee).toFixed(2)+" TL";
+}
+
+renderProducts();
+updateDashboard();
 </script>
 </body>
-  </html>
-
+</html>
