@@ -234,6 +234,7 @@ async function signUp(){
   }
 }
 
+
 async function signIn(){
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value;
@@ -243,61 +244,31 @@ async function signIn(){
     return;
   }
 
-  const {error} = await db.auth.signInWithPassword({email,password});
-  if(error){message(error.message);return;}
+  try {
+    const { data, error } = await db.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-  message("Giriş başarılı!");
-  await loadUser();
-}
+    if(error){
+      message("Giriş hatası: " + error.message);
+      return;
+    }
 
-async function forgotPassword(){
-  const email = document.getElementById("authEmail").value.trim();
+    if(!data.session){
+      message("Oturum açılamadı. Tekrar deneyin.");
+      return;
+    }
 
-  if(!email){
-    message("Önce e-posta adresinizi yazın.");
-    return;
+    message("Giriş başarılı! Hoş geldiniz.");
+
+    await loadUser();
+
+  } catch(error) {
+    message("Beklenmeyen hata: " + error.message);
+    console.error(error);
   }
-
-  const {error} = await db.auth.resetPasswordForEmail(email,{
-    redirectTo:RESET_URL
-  });
-
-  if(error){
-    message("Şifre sıfırlama e-postası gönderilemedi: "+error.message);
-    return;
-  }
-
-  message("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Gelen bağlantıyı açın.");
-}
-
-async function updatePassword(){
-  const p1 = document.getElementById("newPassword").value;
-  const p2 = document.getElementById("newPasswordAgain").value;
-
-  if(p1.length < 6){
-    message("Yeni şifreniz en az 6 karakter olmalı.");
-    return;
-  }
-
-  if(p1 !== p2){
-    message("İki şifre birbiriyle aynı değil.");
-    return;
-  }
-
-  const {data:{session},error:sessionError} = await db.auth.getSession();
-
-  if(sessionError || !session){
-    message("Şifre sıfırlama oturumu bulunamadı. E-postadaki en yeni bağlantıyı yeniden açmanız gerekiyor.");
-    return;
-  }
-
-  const {error} = await db.auth.updateUser({password:p1});
-
-  if(error){
-    message("Şifre değiştirilemedi: "+error.message);
-    return;
-  }
-
+    
   recoveryMode = false;
   document.getElementById("newPassword").value = "";
   document.getElementById("newPasswordAgain").value = "";
