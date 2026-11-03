@@ -661,14 +661,15 @@ async function loadProducts() {
   allProducts = data || [];
   renderProducts();
 }
-
+  
 function renderProducts() {
   const q = document.getElementById("search").value.toLocaleLowerCase("tr");
-  const filtered = allProducts.filter(p =>
-    String(p.name).toLocaleLowerCase("tr").includes(q) ||
-    String(p.description || "").toLocaleLowerCase("tr").includes(
 
-q);
+  const filtered = allProducts.filter(p =>
+    String(p.name || "").toLocaleLowerCase("tr").includes(q) ||
+    String(p.description || "").toLocaleLowerCase("tr").includes(q)
+  );
+
   const area = document.getElementById("products");
 
   if (!filtered.length) {
@@ -679,7 +680,7 @@ q);
   area.innerHTML = filtered.map(p => `
     <div class="product">
       ${p.image_url
-        ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli" onerror="this.style.display='none'">`
+        ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli">`
         : `<div style="font-size:38px">📦</div>`}
       <h3>${escapeHTML(p.name)}</h3>
       <p class="small">${escapeHTML(p.description || "")}</p>
@@ -689,44 +690,32 @@ q);
   `).join("");
 }
 
-/* Satıcı paneli */
 function updateDashboard() {
-  document.getElementById("storeStatus").textContent =
-    myStore ? "Aktif" : "Yok";
+  document.getElementById("storeStatus").textContent = myStore ? "Aktif" : "Yok";
 
   document.getElementById("myStore").innerHTML = myStore
-    ? `<h3>${escapeHTML(myStore.name)}</h3>
-       <p>Kategori: ${escapeHTML(myStore.category || "")}</p>`
+    ? `<h3>${escapeHTML(myStore.name)}</h3><p>${escapeHTML(myStore.category || "")}</p>`
     : "Henüz mağazanız bulunmuyor.";
 
-  const myItems = currentUser && myStore
+  const items = currentUser && myStore
     ? allProducts.filter(p => p.store_id === myStore.id)
     : [];
 
-  document.getElementById("productCount").textContent = myItems.length;
+  document.getElementById("productCount").textContent = items.length;
 
-  document.getElementById("myProducts").innerHTML = myItems.length
-    ? myItems.map(p => `
-        <div class="product">
-          <h3>${escapeHTML(p.name)}</h3>
-          <p>${Number(p.price || 0).toLocaleString("tr-TR")} TL</p>
-        </div>
-      `).join("")
+  document.getElementById("myProducts").innerHTML = items.length
+    ? items.map(p => `<div class="product"><h3>${escapeHTML(p.name)}</h3><p>${Number(p.price || 0).toLocaleString("tr-TR")} TL</p></div>`).join("")
     : "Henüz ürününüz yok.";
 }
 
-/* Destek sistemi */
 function updateSupportVisibility() {
-  document.getElementById("adminSupport")
-    .classList.toggle("hidden", !supportIsAdmin);
+  document.getElementById("adminSupport").classList.toggle("hidden", !supportIsAdmin);
 }
 
 document.getElementById("ticketForm").addEventListener("submit", async e => {
   e.preventDefault();
-
   if (!currentUser) {
-    document.getElementById("ticketNotice").textContent =
-      "Destek talebi oluşturmak için giriş yapmalısınız.";
+    document.getElementById("ticketNotice").textContent = "Önce giriş yapmalısınız.";
     go("account");
     return;
   }
@@ -735,41 +724,27 @@ document.getElementById("ticketForm").addEventListener("submit", async e => {
   const content = document.getElementById("ticketMessage").value.trim();
   const notice = document.getElementById("ticketNotice");
 
-  if (!subject || !content) {
-    notice.textContent = "Lütfen konu ve mesaj alanlarını doldurun.";
-    return;
-  }
-
-  notice.textContent = "Destek talebiniz gönderiliyor...";
-
   try {
-    const { data: ticket, error } = await db
-      .from("support_tickets")
-      .insert({
-        user_id: currentUser.id,
-        subject: subject
-      })
-      .select()
-      .single();
+    notice.textContent = "Gönderiliyor...";
+    const {data: ticket, error} = await db.from("support_tickets")
+      .insert({user_id: currentUser.id, subject})
+      .select().single();
 
     if (error) throw error;
 
-    const { error: messageError } = await db
-      .from("support_messages")
-      .insert({
-        ticket_id: ticket.id,
-        sender_id: currentUser.id,
-        message: content
-      });
+    const {error: msgError} = await db.from("support_messages").insert({
+      ticket_id: ticket.id,
+      sender_id: currentUser.id,
+      message: content
+    });
 
-    if (messageError) throw messageError;
+    if (msgError) throw msgError;
 
-    notice.textContent = "Destek talebiniz başarıyla gönderildi.";
+    notice.textContent = "Destek talebiniz gönderildi.";
     e.target.reset();
     await loadSupportTickets();
-
   } catch (error) {
-    notice.textContent = "Talep gönderilemedi: " + error.message;
+    notice.textContent = "Hata: " + error.message;
   }
 });
 
@@ -780,74 +755,42 @@ async function loadSupportTickets() {
     ? document.getElementById("allTickets")
     : document.getElementById("myTickets");
 
-  target.textContent = "Destek talepleri yükleniyor...";
-
   try {
-    let query = db
-      .from("support_tickets")
-      .select("*")
-      .order("created_at", { ascending: false });
+    let query = db.from("support_tickets").select("*").order("created_at", {ascending:false});
+    if (!supportIsAdmin) query = query.eq("user_id", currentUser.id);
 
-    if (!supportIsAdmin) {
-      query = query.eq("user_id", currentUser.id);
-    }
-
-    const { data, error } = await query;
+    const {data, error} = await query;
     if (error) throw error;
 
-    if (!data || data.length === 0) {
-      target.textContent = "Henüz destek talebi bulunmuyor.";
-      return;
-    }
-
-    target.innerHTML = data.map(ticket => `
+    target.innerHTML = !data?.length ? "Henüz talep yok." : data.map(t => `
       <div class="ticket">
-        <strong>${escapeHTML(ticket.subject)}</strong>
-        <p class="small">Durum: ${escapeHTML(ticket.status)}</p>
-        <button type="button"
-          onclick="openTicket('${ticket.id}')">
-          Görüşmeyi Aç
-        </button>
+        <strong>${escapeHTML(t.subject)}</strong>
+        <p>Durum: ${escapeHTML(t.status)}</p>
+        <button type="button" onclick="openTicket('${t.id}')">Görüşmeyi Aç</button>
       </div>
     `).join("");
-
   } catch (error) {
-    target.textContent = "Talepler yüklenemedi: " + error.message;
+    target.textContent = "Hata: " + error.message;
   }
 }
 
 async function openTicket(id) {
-  if (!db || !currentUser) return;
-
   try {
-    const { data: ticket, error } = await db
-      .from("support_tickets")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
+    const {data, error} = await db.from("support_tickets")
+      .select("*").eq("id", id).maybeSingle();
     if (error) throw error;
-    if (!ticket) throw new Error("Destek talebi bulunamadı.");
+    if (!data) throw new Error("Talep bulunamadı.");
 
-    activeTicket = ticket;
-
-    document.getElementById("conversationTitle").textContent =
-      ticket.subject;
-
-    document.getElementById("ticketConversation")
-      .classList.remove("hidden");
-
-    document.getElementById("adminTicketActions")
-      .classList.toggle("hidden", !supportIsAdmin);
-
-    document.getElementById("ticketStatus").value = ticket.status;
+    activeTicket = data;
+    document.getElementById("conversationTitle").textContent = data.subject;
+    document.getElementById("ticketConversation").classList.remove("hidden");
+    document.getElementById("adminTicketActions").classList.toggle("hidden", !supportIsAdmin);
+    document.getElementById("ticketStatus").value = data.status;
 
     await loadConversationMessages();
     go("ticketConversation");
-
   } catch (error) {
-    document.getElementById("conversationNotice").textContent =
-      "Görüşme açılamadı: " + error.message;
+    document.getElementById("conversationNotice").textContent = error.message;
   }
 }
 
@@ -855,61 +798,44 @@ async function loadConversationMessages() {
   if (!activeTicket) return;
 
   const area = document.getElementById("conversationMessages");
-  area.textContent = "Mesajlar yükleniyor...";
-
-  const { data, error } = await db
-    .from("support_messages")
-    .select("*")
-    .eq("ticket_id", activeTicket.id)
-    .order("created_at", { ascending: true });
+  const {data, error} = await db.from("support_messages")
+    .select("*").eq("ticket_id", activeTicket.id).order("created_at");
 
   if (error) {
-    area.textContent = "Mesajlar yüklenemedi: " + error.message;
+    area.textContent = error.message;
     return;
   }
 
-  area.innerHTML = (data || []).map(item => `
-    <div class="chat-message ${
-      item.sender_id === currentUser.id ? "member" : "admin"
-    }">
-      <p>${escapeHTML(item.message)}</p>
-      <small class="small">${
-        item.sender_id === currentUser.id ? "Siz" : "Destek ekibi"
-      }</small>
+  area.innerHTML = (data || []).map(m => `
+    <div class="chat-message ${m.sender_id === currentUser.id ? "member" : "admin"}">
+      <p>${escapeHTML(m.message)}</p>
+      <small>${m.sender_id === currentUser.id ? "Siz" : "Destek ekibi"}</small>
     </div>
   `).join("") || "Henüz mesaj yok.";
 }
 
 document.getElementById("replyForm").addEventListener("submit", async e => {
   e.preventDefault();
-
   if (!currentUser || !activeTicket) return;
 
   const field = document.getElementById("replyMessage");
   const content = field.value.trim();
-
   if (!content) return;
 
   const notice = document.getElementById("conversationNotice");
-  notice.textContent = "Mesaj gönderiliyor...";
-
   try {
-    const { error } = await db
-      .from("support_messages")
-      .insert({
-        ticket_id: activeTicket.id,
-        sender_id: currentUser.id,
-        message: content
-      });
-
+    const {error} = await db.from("support_messages").insert({
+      ticket_id: activeTicket.id,
+      sender_id: currentUser.id,
+      message: content
+    });
     if (error) throw error;
 
     field.value = "";
-    notice.textContent = "Mesajınız gönderildi.";
+    notice.textContent = "Mesaj gönderildi.";
     await loadConversationMessages();
-
   } catch (error) {
-    notice.textContent = "Mesaj gönderilemedi: " + error.message;
+    notice.textContent = error.message;
   }
 });
 
@@ -917,83 +843,64 @@ async function changeTicketStatus() {
   if (!supportIsAdmin || !activeTicket) return;
 
   const status = document.getElementById("ticketStatus").value;
+  const {error} = await db.from("support_tickets")
+    .update({status, updated_at: new Date().toISOString()})
+    .eq("id", activeTicket.id);
 
-  try {
-    const { error } = await db
-      .from("support_tickets")
-      .update({
-        status: status,
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", activeTicket.id);
-
-    if (error) throw error;
-
-    activeTicket.status = status;
-    document.getElementById("conversationNotice").textContent =
-      "Talep durumu güncellendi.";
-
-    await loadSupportTickets();
-
-  } catch (error) {
-    document.getElementById("conversationNotice").textContent =
-      "Durum güncellenemedi: " + error.message;
+  if (error) {
+    document.getElementById("conversationNotice").textContent = error.message;
+    return;
   }
+
+  activeTicket.status = status;
+  document.getElementById("conversationNotice").textContent = "Durum güncellendi.";
+  await loadSupportTickets();
 }
 
 function closeConversation() {
   activeTicket = null;
-  document.getElementById("ticketConversation")
-    .classList.add("hidden");
+  document.getElementById("ticketConversation").classList.add("hidden");
 }
 
-/* Supabase başlatma ve oturum kontrolü */
 async function startApplication() {
-  const connected = initializeSupabase();
+  if (!initializeSupabase()) return;
 
-  if (!connected) return;
+  try {
+    const {data, error} = await db.auth.getSession();
+    if (error) throw error;
 
-  const { data, error } = await db.auth.getSession();
+    currentUser = data.session?.user || null;
 
-  if (error) {
-    message("Oturum kontrolü yapılamadı: " + error.message);
-    return;
-  }
-
-  currentUser = data.session?.user || null;
-
-  if (window.location.hash.includes("type=recovery")) {
-    showResetBox();
-  } else {
-    await loadUser();
-  }
-
-  db.auth.onAuthStateChange((event, session) => {
-    currentUser = session?.user || null;
-
-    if (event === "PASSWORD_RECOVERY") {
+    if (window.location.hash.includes("type=recovery")) {
       showResetBox();
-      return;
+    } else {
+      await loadUser();
     }
 
-    if (event === "SIGNED_OUT") {
-      myStore = null;
-      supportIsAdmin = false;
-      recoveryMode = false;
-    }
+    db.auth.onAuthStateChange((event, session) => {
+      currentUser = session?.user || null;
 
-    updateAccount();
-
-    Promise.resolve().then(async () => {
-      if (!recoveryMode) {
-        await loadUser();
+      if (event === "PASSWORD_RECOVERY") {
+        showResetBox();
+        return;
       }
+
+      if (event === "SIGNED_OUT") {
+        myStore = null;
+        supportIsAdmin = false;
+        recoveryMode = false;
+      }
+
+      updateAccount();
+      if (!recoveryMode) setTimeout(() => loadUser(), 0);
     });
-  });
+  } catch (error) {
+    message("Başlatma hatası: " + error.message);
+  }
 }
 
-/* Sayfa hazır olduğunda sistemi çalıştır */
 startApplication();
 </script>
 </body>
 </html>
+  
