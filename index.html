@@ -125,13 +125,16 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <textarea id="productDescription" required placeholder="Ürün hakkında bilgi"></textarea>
 <label>Ürün türü</label>
 <select id="productType">
-<option value="Fiziksel Ürün">Fiziksel Ürün</option>
-<option value="Dijital Ürün">Dijital Ürün</option>
+    <option value="physical">Fiziksel Ürün</option>
+    <option value="digital">Dijital Ürün</option>
 </select>
+
 <label>Ürün görsel bağlantısı (isteğe bağlı)</label>
 <input id="productImage" type="url" placeholder="https://...">
+
 <button type="submit">Ürünü Yayınla</button>
 </form>
+
 <p id="productMessage" class="small"></p>
 </div>
 </section>
@@ -425,15 +428,18 @@ document.getElementById("productForm").addEventListener("submit",async e=>{
   }
 
   const product = {
-    store_id:myStore.id,
-    name:document.getElementById("productName").value.trim(),
-    description:document.getElementById("productDescription").value.trim(),
-    price,
-    product_type:document.getElementById("productType").value,
-    image_url:document.getElementById("productImage").value.trim() || null,
-    status:"aktif",
-    is_active:true
-  };
+  const product = {
+    store_id: myStore.id,
+    name: document.getElementById("productName").value.trim(),
+    description: document.getElementById("productDescription").value.trim(),
+    price: price,
+    product_type: document.getElementById("productType").value === "physical"
+        ? "physical"
+        : "digital",
+    image_url: document.getElementById("productImage").value.trim() || null,
+    status: "active",
+    is_active: true
+};
 
   const {error} = await db.from("products").insert(product);
 
