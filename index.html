@@ -235,6 +235,7 @@ async function signUp(){
 }
 
 
+
 async function signIn(){
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value;
@@ -245,7 +246,7 @@ async function signIn(){
   }
 
   try {
-    const { data, error } = await db.auth.signInWithPassword({
+    const {data,error} = await db.auth.signInWithPassword({
       email: email,
       password: password
     });
@@ -255,19 +256,16 @@ async function signIn(){
       return;
     }
 
-    if(!data.session){
-      message("Oturum açılamadı. Tekrar deneyin.");
-      return;
-    }
-
+    recoveryMode = false;
     message("Giriş başarılı! Hoş geldiniz.");
-
     await loadUser();
 
   } catch(error) {
-    message("Beklenmeyen hata: " + error.message);
     console.error(error);
+    message("Giriş yapılamadı: " + error.message);
   }
+    }
+                                                    
     
   recoveryMode = false;
   document.getElementById("newPassword").value = "";
@@ -399,7 +397,6 @@ document.getElementById("productForm").addEventListener("submit",async e=>{
   }
 
   const product = {
-  const product = {
     store_id: myStore.id,
     name: document.getElementById("productName").value.trim(),
     description: document.getElementById("productDescription").value.trim(),
@@ -528,13 +525,19 @@ async function deleteProduct(id){
   await loadMyProducts();
 }
 
+
 function updateDashboard(){
-  document.getElementById("storeStatus").textContent=myStore?"Aktif":"Yok";
-  document.getElementById("myStore").textContent=myStore
-    ? myStore.name+" | "+myStore.category
-    : "Henüz mağaza oluşturulmadı.";
+  document.getElementById("storeStatus").textContent =
+    myStore ? "Aktif" : "Yok";
+
+  document.getElementById("myStore").textContent =
+    myStore
+      ? myStore.name + " | " + myStore.category
+      : "Henüz mağaza oluşturulmadı.";
+
   loadMyProducts();
 }
+    
 
 db.auth.onAuthStateChange((event,session)=>{
   if(event==="PASSWORD_RECOVERY"){
