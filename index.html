@@ -667,3 +667,333 @@ function renderProducts() {
   const filtered = allProducts.filter(p =>
     String(p.name).toLocaleLowerCase("tr").includes(q) ||
     String(p.description || "").toLocaleLowerCase("tr").includes(
+
+q);
+  const area = document.getElementById("products");
+
+  if (!filtered.length) {
+    area.innerHTML = '<p class="small">Henüz ürün bulunamadı.</p>';
+    return;
+  }
+
+  area.innerHTML = filtered.map(p => `
+    <div class="product">
+      ${p.image_url
+        ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli" onerror="this.style.display='none'">`
+        : `<div style="font-size:38px">📦</div>`}
+      <h3>${escapeHTML(p.name)}</h3>
+      <p class="small">${escapeHTML(p.description || "")}</p>
+      <p class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</p>
+      <span class="status">${p.product_type === "digital" ? "Dijital Ürün" : "Fiziksel Ürün"}</span>
+    </div>
+  `).join("");
+}
+
+/* Satıcı paneli */
+function updateDashboard() {
+  document.getElementById("storeStatus").textContent =
+    myStore ? "Aktif" : "Yok";
+
+  document.getElementById("myStore").innerHTML = myStore
+    ? `<h3>${escapeHTML(myStore.name)}</h3>
+       <p>Kategori: ${escapeHTML(myStore.category || "")}</p>`
+    : "Henüz mağazanız bulunmuyor.";
+
+  const myItems = currentUser && myStore
+    ? allProducts.filter(p => p.store_id === myStore.id)
+    : [];
+
+  document.getElementById("productCount").textContent = myItems.length;
+
+  document.getElementById("myProducts").innerHTML = myItems.length
+    ? myItems.map(p => `
+        <div class="product">
+          <h3>${escapeHTML(p.name)}</h3>
+          <p>${Number(p.price || 0).toLocaleString("tr-TR")} TL</p>
+        </div>
+      `).join("")
+    : "Henüz ürününüz yok.";
+}
+
+/* Destek sistemi */
+function updateSupportVisibility() {
+  document.getElementById("adminSupport")
+    .classList.toggle("hidden", !supportIsAdmin);
+}
+
+document.getElementById("ticketForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!currentUser) {
+    document.getElementById("ticketNotice").textContent =
+      "Destek talebi oluşturmak için giriş yapmalısınız.";
+    go("account");
+    return;
+  }
+
+  const subject = document.getElementById("ticketSubject").value.trim();
+  const content = document.getElementById("ticketMessage").value.trim();
+  const notice = document.getElementById("ticketNotice");
+
+  if (!subject || !content) {
+    notice.textContent = "Lütfen konu ve mesaj alanlarını doldurun.";
+    return;
+  }
+
+  notice.textContent = "Destek talebiniz gönderiliyor...";
+
+  try {
+    const { data: ticket, error } = await db
+      .from("support_tickets")
+      .insert({
+        user_id: currentUser.id,
+        subject: subject
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const { error: messageError } = await db
+      .from("support_messages")
+      .insert({
+        ticket_id: ticket.id,
+        sender_id: currentUser.id,
+        message: content
+      });
+
+    if (messageError) throw messageError;
+
+    notice.textContent = "Destek talebiniz başarıyla gönderildi.";
+    e.target.reset();
+    await loadSupportTickets();
+
+  } catch (error) {
+    notice.textContent = "Talep gönderilemedi: " + error.message;
+  }
+});
+
+async function loadSupportTickets() {
+  if (!db || !currentUser) return;
+
+  const target = supportIsAdmin
+    ? document.getElementById("allTickets")
+    : document.getElementById("myTickets");
+
+  target.textContent = "Destek talepleri yükleniyor...";
+
+  try {
+    let query = db
+      .from("support_tickets")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!supportIsAdmin) {
+      query = query.eq("user_id", currentUser.id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      target.textContent = "Henüz destek talebi bulunmuyor.";
+      return;
+    }
+
+    target.innerHTML = data.map(ticket => `
+      <div class="ticket">
+        <strong>${escapeHTML(ticket.subject)}</strong>
+        <p class="small">Durum: ${escapeHTML(ticket.status)}</p>
+        <button type="button"
+          onclick="openTicket('${ticket.id}')">
+          Görüşmeyi Aç
+        </button>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    target.textContent = "Talepler yüklenemedi: " + error.message;
+  }
+}
+
+async function openTicket(id) {
+  if (!db || !currentUser) return;
+
+  try {
+    const { data: ticket, error } = await db
+      .from("support_tickets")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!ticket) throw new Error("Destek talebi bulunamadı.");
+
+    activeTicket = ticket;
+
+    document.getElementById("conversationTitle").textContent =
+      ticket.subject;
+
+    document.getElementById("ticketConversation")
+      .classList.remove("hidden");
+
+    document.getElementById("adminTicketActions")
+      .classList.toggle("hidden", !supportIsAdmin);
+
+    document.getElementById("ticketStatus").value = ticket.status;
+
+    await loadConversationMessages();
+    go("ticketConversation");
+
+  } catch (error) {
+    document.getElementById("conversationNotice").textContent =
+      "Görüşme açılamadı: " + error.message;
+  }
+}
+
+async function loadConversationMessages() {
+  if (!activeTicket) return;
+
+  const area = document.getElementById("conversationMessages");
+  area.textContent = "Mesajlar yükleniyor...";
+
+  const { data, error } = await db
+    .from("support_messages")
+    .select("*")
+    .eq("ticket_id", activeTicket.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    area.textContent = "Mesajlar yüklenemedi: " + error.message;
+    return;
+  }
+
+  area.innerHTML = (data || []).map(item => `
+    <div class="chat-message ${
+      item.sender_id === currentUser.id ? "member" : "admin"
+    }">
+      <p>${escapeHTML(item.message)}</p>
+      <small class="small">${
+        item.sender_id === currentUser.id ? "Siz" : "Destek ekibi"
+      }</small>
+    </div>
+  `).join("") || "Henüz mesaj yok.";
+}
+
+document.getElementById("replyForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!currentUser || !activeTicket) return;
+
+  const field = document.getElementById("replyMessage");
+  const content = field.value.trim();
+
+  if (!content) return;
+
+  const notice = document.getElementById("conversationNotice");
+  notice.textContent = "Mesaj gönderiliyor...";
+
+  try {
+    const { error } = await db
+      .from("support_messages")
+      .insert({
+        ticket_id: activeTicket.id,
+        sender_id: currentUser.id,
+        message: content
+      });
+
+    if (error) throw error;
+
+    field.value = "";
+    notice.textContent = "Mesajınız gönderildi.";
+    await loadConversationMessages();
+
+  } catch (error) {
+    notice.textContent = "Mesaj gönderilemedi: " + error.message;
+  }
+});
+
+async function changeTicketStatus() {
+  if (!supportIsAdmin || !activeTicket) return;
+
+  const status = document.getElementById("ticketStatus").value;
+
+  try {
+    const { error } = await db
+      .from("support_tickets")
+      .update({
+        status: status,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", activeTicket.id);
+
+    if (error) throw error;
+
+    activeTicket.status = status;
+    document.getElementById("conversationNotice").textContent =
+      "Talep durumu güncellendi.";
+
+    await loadSupportTickets();
+
+  } catch (error) {
+    document.getElementById("conversationNotice").textContent =
+      "Durum güncellenemedi: " + error.message;
+  }
+}
+
+function closeConversation() {
+  activeTicket = null;
+  document.getElementById("ticketConversation")
+    .classList.add("hidden");
+}
+
+/* Supabase başlatma ve oturum kontrolü */
+async function startApplication() {
+  const connected = initializeSupabase();
+
+  if (!connected) return;
+
+  const { data, error } = await db.auth.getSession();
+
+  if (error) {
+    message("Oturum kontrolü yapılamadı: " + error.message);
+    return;
+  }
+
+  currentUser = data.session?.user || null;
+
+  if (window.location.hash.includes("type=recovery")) {
+    showResetBox();
+  } else {
+    await loadUser();
+  }
+
+  db.auth.onAuthStateChange((event, session) => {
+    currentUser = session?.user || null;
+
+    if (event === "PASSWORD_RECOVERY") {
+      showResetBox();
+      return;
+    }
+
+    if (event === "SIGNED_OUT") {
+      myStore = null;
+      supportIsAdmin = false;
+      recoveryMode = false;
+    }
+
+    updateAccount();
+
+    Promise.resolve().then(async () => {
+      if (!recoveryMode) {
+        await loadUser();
+      }
+    });
+  });
+}
+
+/* Sayfa hazır olduğunda sistemi çalıştır */
+startApplication();
+</script>
+</body>
+</html>
