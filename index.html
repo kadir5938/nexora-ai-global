@@ -43,6 +43,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 .chat-message.member{border-left:3px solid #16865b}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -60,8 +61,8 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <div class="hero" id="home">
   <h1>Gelecek <span>NEXORA</span> ile Başlıyor</h1>
   <p>Herkes için küresel dijital ticaret platformu.</p>
-  <button onclick="go('seller')">Ücretsiz Mağaza Aç</button>
-  <button class="secondary" onclick="go('market')">Ürünleri Keşfet</button>
+  <button type="button" onclick="go('seller')">Ücretsiz Mağaza Aç</button>
+  <button type="button" class="secondary" onclick="go('market')">Ürünleri Keşfet</button>
 </div>
 
 <section>
@@ -76,6 +77,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 <section id="account">
   <h2>👤 Üyelik ve Giriş</h2>
   <div class="panel">
+
     <div id="authForms">
       <label>Adınız</label>
       <input id="fullName" placeholder="Adınız">
@@ -124,6 +126,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
         <option>Ev ve Yaşam</option>
         <option>Diğer</option>
       </select>
+
       <button type="submit">Mağazamı Oluştur</button>
     </form>
     <p id="sellerMessage" class="small"></p>
@@ -189,6 +192,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
   <div class="panel" id="supportMember">
     <h3>Yeni destek talebi oluştur</h3>
     <p class="small">Sorununu veya yardım talebini bize iletebilirsin.</p>
+
     <form id="ticketForm">
       <label>Konu</label>
       <input id="ticketSubject" required maxlength="150" placeholder="Örn. Mağaza açma konusunda yardım">
@@ -198,8 +202,8 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 
       <button type="submit">Destek Talebi Gönder</button>
     </form>
-    <p id="ticketNotice" class="small"></p>
 
+    <p id="ticketNotice" class="small"></p>
     <h3>📨 Destek taleplerim</h3>
     <div id="myTickets">Taleplerinizi görmek için giriş yapın.</div>
   </div>
@@ -231,6 +235,7 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
       </select>
       <button type="button" onclick="changeTicketStatus()">Durumu Güncelle</button>
     </div>
+
     <p id="conversationNotice" class="small"></p>
   </div>
 </section>
@@ -242,6 +247,8 @@ footer{text-align:center;padding:30px;color:#91a9c3;background:#091625}
 </footer>
 
 <script>
+"use strict";
+
 /* Hata yakalama */
 window.onerror = function(msg, source, line) {
   const box = document.getElementById("message");
@@ -250,7 +257,10 @@ window.onerror = function(msg, source, line) {
 
 window.addEventListener("unhandledrejection", function(event) {
   const box = document.getElementById("message");
-  if (box) box.textContent = "İşlem hatası: " + (event.reason?.message || event.reason);
+  if (box) {
+    box.textContent = "İşlem hatası: " +
+      (event.reason?.message || String(event.reason));
+  }
 });
 
 /* Supabase ayarları */
@@ -267,38 +277,14 @@ let loadingAuth = false;
 let supportIsAdmin = false;
 let activeTicket = null;
 
-function initializeSupabase() {
-  if (!window.supabase || !window.supabase.createClient) {
-    message("Supabase bağlantı kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
-    return false;
-  }
-
-  try {
-    db = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY,
-      {
-        auth: {
-          detectSessionInUrl: true,
-          persistSession: true,
-          autoRefreshToken: true
-        }
-      }
-    );
-    return true;
-  } catch (error) {
-    message("Supabase başlatılamadı: " + error.message);
-    return false;
-  }
+/* Genel yardımcılar */
+function message(text) {
+  const el = document.getElementById("message");
+  if (el) el.textContent = text;
 }
 
 function go(id) {
   document.getElementById(id)?.scrollIntoView({behavior:"smooth"});
-}
-
-function message(text) {
-  const el = document.getElementById("message");
-  if (el) el.textContent = text;
 }
 
 function escapeHTML(value) {
@@ -311,8 +297,35 @@ function escapeHTML(value) {
   }[c]));
 }
 
+/* Supabase başlatma */
+function initializeSupabase() {
+  if (!window.supabase || !window.supabase.createClient) {
+    message("Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.");
+    return false;
+  }
+
+  try {
+    db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+      {
+        auth: {
+          detectSessionInUrl:true,
+          persistSession:true,
+          autoRefreshToken:true
+        }
+      }
+    );
+    return true;
+  } catch(error) {
+    message("Supabase başlatılamadı: " + error.message);
+    return false;
+  }
+}
+
 function setAuthLoading(value) {
   loadingAuth = value;
+
   ["signUpButton","signInButton","forgotButton"].forEach(id => {
     const button = document.getElementById(id);
     if (button) button.disabled = value;
@@ -339,10 +352,12 @@ function updateAccount() {
     loggedIn ? "Giriş yapan: " + currentUser.email : "";
 }
 
+/* Üye ol */
 async function signUp() {
   if (loadingAuth) return;
+
   if (!db) {
-    message("Bağlantı hazır değil. Sayfayı yenileyin.");
+    message("Supabase bağlantısı hazır değil. Sayfayı yenileyin.");
     return;
   }
 
@@ -363,7 +378,7 @@ async function signUp() {
       email,
       password,
       options: {
-        data: {full_name:name},
+        data:{full_name:name},
         emailRedirectTo:RESET_URL
       }
     });
@@ -379,7 +394,7 @@ async function signUp() {
     } else {
       message("Kayıt oluşturuldu. E-postanıza gelen doğrulama bağlantısına tıklayın. Ardından giriş yapabilirsiniz.");
     }
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     message("Kayıt hatası: " + error.message);
   } finally {
@@ -387,10 +402,12 @@ async function signUp() {
   }
 }
 
+/* Giriş yap */
 async function signIn() {
   if (loadingAuth) return;
+
   if (!db) {
-    message("Bağlantı hazır değil. Sayfayı yenileyin.");
+    message("Supabase bağlantısı hazır değil. Sayfayı yenileyin.");
     return;
   }
 
@@ -406,15 +423,19 @@ async function signIn() {
     setAuthLoading(true);
     message("Giriş yapılıyor...");
 
-    const {data,error} = await db.auth.signInWithPassword({email,password});
+    const {data,error} = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
     if (error) throw error;
 
-    recoveryMode = false;
     currentUser = data.user;
+    recoveryMode = false;
     updateAccount();
     message("Giriş başarılı! Hoş geldiniz.");
     await loadUser();
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     message("Giriş hatası: " + error.message);
   } finally {
@@ -422,10 +443,12 @@ async function signIn() {
   }
 }
 
+/* Şifremi unuttum */
 async function forgotPassword() {
   if (loadingAuth) return;
+
   if (!db) {
-    message("Bağlantı hazır değil. Sayfayı yenileyin.");
+    message("Supabase bağlantısı hazır değil. Sayfayı yenileyin.");
     return;
   }
 
@@ -446,8 +469,9 @@ async function forgotPassword() {
     });
 
     if (error) throw error;
+
     message("Şifre yenileme bağlantısı e-posta adresinize gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     message("Şifre sıfırlama hatası: " + error.message);
   } finally {
@@ -455,6 +479,7 @@ async function forgotPassword() {
   }
 }
 
+/* Yeni şifre kaydet */
 async function updatePassword() {
   if (loadingAuth || !db) return;
 
@@ -465,6 +490,7 @@ async function updatePassword() {
     message("Yeni şifreniz en az 6 karakter olmalıdır.");
     return;
   }
+
   if (password !== again) {
     message("Girdiğiniz şifreler aynı değil.");
     return;
@@ -478,6 +504,7 @@ async function updatePassword() {
     if (error) throw error;
 
     await db.auth.signOut();
+
     currentUser = null;
     myStore = null;
     recoveryMode = false;
@@ -488,7 +515,7 @@ async function updatePassword() {
     updateAccount();
     updateDashboard();
     message("Şifreniz başarıyla değiştirildi. Yeni şifrenizle giriş yapabilirsiniz.");
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     message("Şifre güncellenemedi: " + error.message);
   } finally {
@@ -496,10 +523,12 @@ async function updatePassword() {
   }
 }
 
+/* Güvenli çıkış */
 async function signOutUser() {
   if (!db) return;
 
   const {error} = await db.auth.signOut();
+
   if (error) {
     message("Çıkış hatası: " + error.message);
     return;
@@ -509,9 +538,14 @@ async function signOutUser() {
   myStore = null;
   supportIsAdmin = false;
   recoveryMode = false;
+
   updateAccount();
   updateDashboard();
   updateSupportVisibility();
+
+  document.getElementById("myTickets").textContent = "Taleplerinizi görmek için giriş yapın.";
+  document.getElementById("allTickets").innerHTML = "";
+
   message("Oturum kapatıldı.");
 }
 
@@ -520,7 +554,10 @@ async function loadUser() {
   if (!db || recoveryMode) return;
 
   const {data,error} = await db.auth.getUser();
-  if (error) console.error(error);
+
+  if (error) {
+    console.error(error);
+  }
 
   currentUser = data?.user || null;
   supportIsAdmin = currentUser?.app_metadata?.role === "admin";
@@ -539,6 +576,8 @@ async function loadUser() {
 
   if (currentUser) {
     await loadSupportTickets();
+  } else {
+    document.getElementById("myTickets").textContent = "Taleplerinizi görmek için giriş yapın.";
   }
 }
 
@@ -560,7 +599,7 @@ async function loadMyStore() {
 }
 
 /* Mağaza oluşturma */
-document.getElementById("sellerForm").addEventListener("submit",async e => {
+document.getElementById("sellerForm").addEventListener("submit", async e => {
   e.preventDefault();
 
   if (!currentUser) {
@@ -582,21 +621,25 @@ document.getElementById("sellerForm").addEventListener("submit",async e => {
     is_active:true
   };
 
-  const {data,error} = await db.from("stores").insert(store).select().single();
+  try {
+    const {data,error} = await db.from("stores")
+      .insert(store)
+      .select()
+      .single();
 
-  if (error) {
+    if (error) throw error;
+
+    myStore = data;
+    document.getElementById("sellerMessage").textContent = "Mağazanız başarıyla oluşturuldu!";
+    e.target.reset();
+    updateDashboard();
+  } catch(error) {
     document.getElementById("sellerMessage").textContent = "Mağaza oluşturulamadı: " + error.message;
-    return;
   }
-
-  myStore = data;
-  document.getElementById("sellerMessage").textContent = "Mağazanız başarıyla oluşturuldu!";
-  e.target.reset();
-  updateDashboard();
 });
 
 /* Ürün ekleme */
-document.getElementById("productForm").addEventListener("submit",async e => {
+document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
 
   if (!currentUser) {
@@ -629,278 +672,267 @@ document.getElementById("productForm").addEventListener("submit",async e => {
     is_active:true
   };
 
-  const {error} = await db.from("products").insert(product);
+  try {
+    const {error} = await db.from("products").insert(product);
+    if (error) throw error;
 
-  if (error) {
+    document.getElementById("productMessage").textContent = "Ürününüz pazaryerine eklendi!";
+    e.target.reset();
+
+    await loadProducts();
+    updateDashboard();
+    go("market");
+  } catch(error) {
     document.getElementById("productMessage").textContent = "Ürün eklenemedi: " + error.message;
-    return;
   }
-
-  document.getElementById("productMessage").textContent = "Ürününüz pazaryerine eklendi!";
-  e.target.reset();
-  await loadProducts();
-  updateDashboard();
-  go("market");
 });
 
-/* Pazaryeri */
+/* Ürünleri yükle */
+
 async function loadProducts() {
-  if (!db) return;
+  const area = document.getElementById("products");
+  if (!area) return;
 
-  const {data,error} = await db.from("products")
-    .select("*")
-    .eq("status","active")
-    .eq("is_active",true)
-    .order("created_at",{ascending:false});
+  area.innerHTML = '<p class="small">Ürünler yükleniyor...</p>';
 
-  if (error) {
-    document.getElementById("products").textContent = "Ürünler yüklenemedi: " + error.message;
+  try {
+    const { data, error } = await db
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    allProducts = data || [];
+
+    renderProducts(allProducts);
+  } catch (error) {
+    area.innerHTML =
+      '<p class="small">Ürünler yüklenemedi: ' +
+      escapeHTML(error.message) +
+      '</p>';
+  }
+}
+
+/* Ürünleri ekrana yazdır */
+function renderProducts(products) {
+  const area = document.getElementById("products");
+  if (!area) return;
+
+  if (!products || products.length === 0) {
+    area.innerHTML = '<p class="small">Henüz ürün bulunamadı.</p>';
     return;
   }
 
-  allProducts = data || [];
-  renderProducts();
+  area.innerHTML = products.map(p => `
+    <div class="product">
+      ${
+        p.image_url
+          ? `<img src="${escapeHTML(p.image_url)}"
+               alt="Ürün görseli"
+               onerror="this.style.display='none'">`
+          : `<div style="font-size:38px">📦</div>`
+      }
+      <h3>${escapeHTML(p.name || "")}</h3>
+      <p class="small">${escapeHTML(p.description || "")}</p>
+      <strong>${Number(p.price || 0).toLocaleString("tr-TR")} TL</strong>
+    </div>
+  `).join("");
 }
-  
-function renderProducts() {
-  const q = document.getElementById("search").value.toLocaleLowerCase("tr");
+
+/* Ürün arama */
+document.getElementById("search")?.addEventListener("input", function () {
+  const q = this.value.toLocaleLowerCase("tr");
 
   const filtered = allProducts.filter(p =>
     String(p.name || "").toLocaleLowerCase("tr").includes(q) ||
     String(p.description || "").toLocaleLowerCase("tr").includes(q)
   );
 
-  const area = document.getElementById("products");
+  renderProducts(filtered);
+});
 
-  if (!filtered.length) {
-    area.innerHTML = '<p class="small">Henüz ürün bulunamadı.</p>';
-    return;
+/* Panel bilgilerini güncelle */
+async function updateDashboard() {
+  try {
+    const { data: { user }, error } = await db.auth.getUser();
+    if (error || !user) return;
+
+    const { data: store } = await db
+      .from("stores")
+      .select("*")
+      .eq("owner_id", user.id)
+      .maybeSingle();
+
+    const { data: products } = await db
+      .from("products")
+      .select("id")
+      .eq("owner_id", user.id);
+
+    const count = document.getElementById("productCount");
+    const status = document.getElementById("storeStatus");
+    const myStore = document.getElementById("myStore");
+    const myProducts = document.getElementById("myProducts");
+
+    if (count) count.textContent = (products || []).length;
+    if (status) status.textContent = store ? "Mağazanız aktif" : "Mağazanız yok";
+    if (myStore) myStore.textContent = store ? store.name : "Henüz mağaza açmadınız.";
+    if (myProducts) myProducts.textContent = (products || []).length + " ürün";
+  } catch (error) {
+    console.error("Panel hatası:", error);
   }
-
-  area.innerHTML = filtered.map(p => `
-    <div class="product">
-      ${p.image_url
-        ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli">`
-        : `<div style="font-size:38px">📦</div>`}
-      <h3>${escapeHTML(p.name)}</h3>
-      <p class="small">${escapeHTML(p.description || "")}</p>
-      <p class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</p>
-      <span class="status">${p.product_type === "digital" ? "Dijital Ürün" : "Fiziksel Ürün"}</span>
-    </div>
-  `).join("");
 }
 
-function updateDashboard() {
-  document.getElementById("storeStatus").textContent = myStore ? "Aktif" : "Yok";
-
-  document.getElementById("myStore").innerHTML = myStore
-    ? `<h3>${escapeHTML(myStore.name)}</h3><p>${escapeHTML(myStore.category || "")}</p>`
-    : "Henüz mağazanız bulunmuyor.";
-
-  const items = currentUser && myStore
-    ? allProducts.filter(p => p.store_id === myStore.id)
-    : [];
-
-  document.getElementById("productCount").textContent = items.length;
-
-  document.getElementById("myProducts").innerHTML = items.length
-    ? items.map(p => `<div class="product"><h3>${escapeHTML(p.name)}</h3><p>${Number(p.price || 0).toLocaleString("tr-TR")} TL</p></div>`).join("")
-    : "Henüz ürününüz yok.";
-}
-
-function updateSupportVisibility() {
-  document.getElementById("adminSupport").classList.toggle("hidden", !supportIsAdmin);
-}
-
-document.getElementById("ticketForm").addEventListener("submit", async e => {
+/* Destek talebi oluştur */
+document.getElementById("ticketForm")?.addEventListener("submit", async function(e) {
   e.preventDefault();
-  if (!currentUser) {
-    document.getElementById("ticketNotice").textContent = "Önce giriş yapmalısınız.";
-    go("account");
-    return;
-  }
 
-  const subject = document.getElementById("ticketSubject").value.trim();
-  const content = document.getElementById("ticketMessage").value.trim();
   const notice = document.getElementById("ticketNotice");
+  const subject = document.getElementById("ticketSubject").value.trim();
+  const message = document.getElementById("ticketMessage").value.trim();
 
   try {
-    notice.textContent = "Gönderiliyor...";
-    const {data: ticket, error} = await db.from("support_tickets")
-      .insert({user_id: currentUser.id, subject})
-      .select().single();
+    const { data: { user } } = await db.auth.getUser();
+
+    if (!user) {
+      notice.textContent = "Destek talebi için giriş yapmalısınız.";
+      return;
+    }
+
+    const { error } = await db.from("support_tickets").insert({
+      user_id: user.id,
+      subject,
+      message,
+      status: "open"
+    });
 
     if (error) throw error;
 
-    const {error: msgError} = await db.from("support_messages").insert({
-      ticket_id: ticket.id,
-      sender_id: currentUser.id,
-      message: content
-    });
-
-    if (msgError) throw msgError;
-
-    notice.textContent = "Destek talebiniz gönderildi.";
-    e.target.reset();
-    await loadSupportTickets();
+    notice.textContent = "Destek talebiniz oluşturuldu.";
+    this.reset();
+    await loadTickets();
   } catch (error) {
     notice.textContent = "Hata: " + error.message;
   }
 });
 
-async function loadSupportTickets() {
-  if (!db || !currentUser) return;
-
-  const target = supportIsAdmin
-    ? document.getElementById("allTickets")
-    : document.getElementById("myTickets");
+/* Destek taleplerini yükle */
+async function loadTickets() {
+  const area = document.getElementById("myTickets");
+  if (!area) return;
 
   try {
-    let query = db.from("support_tickets").select("*").order("created_at", {ascending:false});
-    if (!supportIsAdmin) query = query.eq("user_id", currentUser.id);
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) {
+      area.innerHTML = "Destek taleplerini görmek için giriş yapın.";
+      return;
+    }
 
-    const {data, error} = await query;
+    const { data, error } = await db
+      .from("support_tickets")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
     if (error) throw error;
 
-    target.innerHTML = !data?.length ? "Henüz talep yok." : data.map(t => `
-      <div class="ticket">
-        <strong>${escapeHTML(t.subject)}</strong>
-        <p>Durum: ${escapeHTML(t.status)}</p>
-        <button type="button" onclick="openTicket('${t.id}')">Görüşmeyi Aç</button>
+    area.innerHTML = (data || []).map(t => `
+      <div class="product">
+        <h3>${escapeHTML(t.subject || "Destek talebi")}</h3>
+        <p>${escapeHTML(t.message || "")}</p>
+        <p class="small">Durum: ${escapeHTML(t.status || "open")}</p>
+        <button type="button" onclick="openTicket('${t.id}')">
+          Görüşmeyi Aç
+        </button>
       </div>
-    `).join("");
+    `).join("") || "<p>Henüz destek talebiniz yok.</p>";
+
   } catch (error) {
-    target.textContent = "Hata: " + error.message;
+    area.textContent = "Talepler yüklenemedi: " + error.message;
   }
 }
 
-async function openTicket(id) {
-  try {
-    const {data, error} = await db.from("support_tickets")
-      .select("*").eq("id", id).maybeSingle();
-    if (error) throw error;
-    if (!data) throw new Error("Talep bulunamadı.");
+/* Destek görüşmesini aç */
+async function openTicket(ticketId) {
+  window.selectedTicketId = ticketId;
 
-    activeTicket = data;
-    document.getElementById("conversationTitle").textContent = data.subject;
-    document.getElementById("ticketConversation").classList.remove("hidden");
-    document.getElementById("adminTicketActions").classList.toggle("hidden", !supportIsAdmin);
-    document.getElementById("ticketStatus").value = data.status;
+  const title = document.getElementById("conversationTitle");
+  const messagesArea = document.getElementById("conversationMessages");
 
-    await loadConversationMessages();
-    go("ticketConversation");
-  } catch (error) {
-    document.getElementById("conversationNotice").textContent = error.message;
-  }
+  if (title) title.textContent = "Destek görüşmesi";
+  if (messagesArea) messagesArea.innerHTML = "Mesajlar yükleniyor...";
+
+  await loadConversationMessages();
 }
 
+/* Destek mesajlarını yükle */
 async function loadConversationMessages() {
-  if (!activeTicket) return;
-
   const area = document.getElementById("conversationMessages");
-  const {data, error} = await db.from("support_messages")
-    .select("*").eq("ticket_id", activeTicket.id).order("created_at");
+  if (!area || !window.selectedTicketId) return;
 
-  if (error) {
-    area.textContent = error.message;
+  try {
+    const { data, error } = await db
+      .from("support_messages")
+      .select("*")
+      .eq("ticket_id", window.selectedTicketId)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+
+    area.innerHTML = (data || []).map(m => `
+      <div class="product">
+        <p>${escapeHTML(m.message || "")}</p>
+        <small>${escapeHTML(m.user_id || "")}</small>
+      </div>
+    `).join("") || "<p>Henüz mesaj yok.</p>";
+
+  } catch (error) {
+    area.textContent = "Mesajlar yüklenemedi: " + error.message;
+  }
+}
+
+/* Destek görüşmesine cevap gönder */
+document.getElementById("replyForm")?.addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const message = document.getElementById("replyMessage").value.trim();
+  const notice = document.getElementById("conversationNotice");
+
+  if (!message || !window.selectedTicketId) {
+    if (notice) notice.textContent = "Önce bir destek görüşmesi açın.";
     return;
   }
 
-  area.innerHTML = (data || []).map(m => `
-    <div class="chat-message ${m.sender_id === currentUser.id ? "member" : "admin"}">
-      <p>${escapeHTML(m.message)}</p>
-      <small>${m.sender_id === currentUser.id ? "Siz" : "Destek ekibi"}</small>
-    </div>
-  `).join("") || "Henüz mesaj yok.";
-}
-
-document.getElementById("replyForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  if (!currentUser || !activeTicket) return;
-
-  const field = document.getElementById("replyMessage");
-  const content = field.value.trim();
-  if (!content) return;
-
-  const notice = document.getElementById("conversationNotice");
   try {
-    const {error} = await db.from("support_messages").insert({
-      ticket_id: activeTicket.id,
-      sender_id: currentUser.id,
-      message: content
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) throw new Error("Giriş yapmalısınız.");
+
+    const { error } = await db.from("support_messages").insert({
+      ticket_id: window.selectedTicketId,
+      user_id: user.id,
+      message
     });
+
     if (error) throw error;
 
-    field.value = "";
-    notice.textContent = "Mesaj gönderildi.";
+    this.reset();
+    if (notice) notice.textContent = "Mesajınız gönderildi.";
     await loadConversationMessages();
+
   } catch (error) {
-    notice.textContent = error.message;
+    if (notice) notice.textContent = "Hata: " + error.message;
   }
 });
 
-async function changeTicketStatus() {
-  if (!supportIsAdmin || !activeTicket) return;
-
-  const status = document.getElementById("ticketStatus").value;
-  const {error} = await db.from("support_tickets")
-    .update({status, updated_at: new Date().toISOString()})
-    .eq("id", activeTicket.id);
-
-  if (error) {
-    document.getElementById("conversationNotice").textContent = error.message;
-    return;
-  }
-
-  activeTicket.status = status;
-  document.getElementById("conversationNotice").textContent = "Durum güncellendi.";
-  await loadSupportTickets();
+/* Sayfa açılış işlemleri */
+async function initializePage() {
+  await loadProducts();
+  await updateDashboard();
+  await loadTickets();
 }
 
-function closeConversation() {
-  activeTicket = null;
-  document.getElementById("ticketConversation").classList.add("hidden");
-}
-
-async function startApplication() {
-  if (!initializeSupabase()) return;
-
-  try {
-    const {data, error} = await db.auth.getSession();
-    if (error) throw error;
-
-    currentUser = data.session?.user || null;
-
-    if (window.location.hash.includes("type=recovery")) {
-      showResetBox();
-    } else {
-      await loadUser();
-    }
-
-    db.auth.onAuthStateChange((event, session) => {
-      currentUser = session?.user || null;
-
-      if (event === "PASSWORD_RECOVERY") {
-        showResetBox();
-        return;
-      }
-
-      if (event === "SIGNED_OUT") {
-        myStore = null;
-        supportIsAdmin = false;
-        recoveryMode = false;
-      }
-
-      updateAccount();
-      if (!recoveryMode) setTimeout(() => loadUser(), 0);
-    });
-  } catch (error) {
-    message("Başlatma hatası: " + error.message);
-  }
-}
-
-startApplication();
+initializePage();
 </script>
 </body>
 </html>
-  
