@@ -955,11 +955,12 @@ async function loadProducts(){
   }catch(error){
     area.innerHTML='<div class="empty-state">Ürünler yüklenemedi: '+escapeHTML(error.message)+'</div>';
   }
-  }
+  
   function productCard(p){
   const image=p.image_url
     ? '<img src="'+escapeHTML(p.image_url)+'" alt="'+escapeHTML(p.name)+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=product-placeholder>📦</div>\'">'
     : '<div class="product-placeholder">📦</div>';
+
   return `
     <article class="product">
       <div class="product-image">${image}</div>
@@ -968,9 +969,37 @@ async function loadProducts(){
         <h3>${escapeHTML(p.name)}</h3>
         <p class="description">${escapeHTML(p.description||"Ürün açıklaması bulunmuyor.")}</p>
         <div class="price">${Number(p.price||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})} TL</div>
+        <button type="button" class="btn btn-primary" onclick="createDemoOrder('${p.id}')">
+          Sipariş Ver
+        </button>
       </div>
     </article>`;
+}
+async function createDemoOrder(productId){
+  if(!currentUser){
+    message("Sipariş vermek için önce giriş yapmalısınız.");
+    return;
   }
+
+  if(!confirm("Deneme siparişi oluşturulsun mu? Gerçek ödeme alınmayacaktır.")){
+    return;
+  }
+
+  try{
+    message("Sipariş oluşturuluyor...");
+
+    const {data,error}=await db.rpc("create_demo_order",{
+      p_product_id:productId,
+      p_quantity:1
+    });
+
+    if(error) throw error;
+
+    message("Deneme siparişi oluşturuldu! Sipariş numarası: "+data);
+  }catch(error){
+    message("Sipariş oluşturulamadı: "+error.message);
+  }
+    }
   function renderProducts(){
   const area=$("products");
   if(!area) return;
@@ -987,6 +1016,7 @@ async function loadProducts(){
 }
 
 $("search").addEventListener("input",renderProducts);
+    
 async function updateDashboard(){
   if(!currentUser){
     $("productCount").textContent="0";
