@@ -1140,6 +1140,9 @@ function startApp(){
 }
 
 startApp();
+  window.addEventListener("error",function(e){
+  alert("NEXORA HATASI: "+e.message+" | Satır: "+e.lineno);
+});
 </script>
 </body>
 </html>
