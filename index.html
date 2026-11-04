@@ -939,24 +939,31 @@ $("productForm").addEventListener("submit",async function(e){
   }
 });
 
+
 async function loadProducts(){
   const area=$("products");
   if(!area||!db) return;
+
   area.innerHTML='<div class="empty-state">Ürünler yükleniyor...</div>';
+
   try{
     const {data,error}=await db.from("products")
       .select("*")
       .eq("is_active",true)
       .eq("status","active")
       .order("created_at",{ascending:false});
+
     if(error) throw error;
+
     allProducts=data||[];
     renderProducts();
+
   }catch(error){
     area.innerHTML='<div class="empty-state">Ürünler yüklenemedi: '+escapeHTML(error.message)+'</div>';
   }
-  
-  function productCard(p){
+}
+
+function productCard(p){
   const image=p.image_url
     ? '<img src="'+escapeHTML(p.image_url)+'" alt="'+escapeHTML(p.name)+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=product-placeholder>📦</div>\'">'
     : '<div class="product-placeholder">📦</div>';
@@ -974,7 +981,6 @@ async function loadProducts(){
         </button>
       </div>
     </article>`;
-}
 }
 
 async function createDemoOrder(productId){
@@ -998,22 +1004,28 @@ async function createDemoOrder(productId){
     if(error) throw error;
 
     message("Deneme siparişi oluşturuldu! Sipariş numarası: "+data);
+
   }catch(error){
     message("Sipariş oluşturulamadı: "+error.message);
   }
-    }
-  function renderProducts(){
+}
+
+function renderProducts(){
   const area=$("products");
   if(!area) return;
+
   const q=$("search").value.toLocaleLowerCase("tr");
+
   const items=allProducts.filter(p=>
     String(p.name||"").toLocaleLowerCase("tr").includes(q)||
     String(p.description||"").toLocaleLowerCase("tr").includes(q)
   );
+
   if(!items.length){
     area.innerHTML='<div class="empty-state">Henüz ürün bulunamadı. Aramanı değiştirebilir veya daha sonra tekrar bakabilirsin.</div>';
     return;
   }
+
   area.innerHTML=items.map(productCard).join("");
 }
 
