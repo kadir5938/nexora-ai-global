@@ -1,423 +1,829 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexora Mağaza ve Pazaryeri</title>
-        <style>
-        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; background-color: #f9f9f9; color: #333; }
-        section { background: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                    input, select, textarea { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; }
-        button:hover { background-color: #0056b3; }
-                    button.danger { background-color: #dc3545; }
-        button.danger:hover { background-color: #a71d2a; }
-        button.secondary { background-color: #6c757d; }
-        button.secondary:hover { background-color: #5a6268; }
-        .hidden { display: none !important; }
-        .small { font-size: 14px; color: #666; }
-        .product { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 6px; background: #fff; }
-        #message { font-weight: bold; color: #d9534f; margin-bottom: 15px; }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora Mağaza ve Pazaryeri</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  font-family:Arial,sans-serif;
+  max-width:900px;
+  margin:0 auto;
+  padding:20px;
+  line-height:1.6;
+  background-color:#f9f9f9;
+  color:#333;
+}
+section{
+  background:#fff;
+  padding:20px;
+  margin-bottom:20px;
+  border-radius:8px;
+  box-shadow:0 2px 4px rgba(0,0,0,.1);
+}
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  box-sizing:border-box;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+button{
+  background-color:#007BFF;
+  color:white;
+  padding:10px 15px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  margin:5px 5px 5px 0;
+}
+button:hover{background-color:#0056b3}
+button:disabled{opacity:.6;cursor:not-allowed}
+button.danger{background-color:#dc3545}
+button.danger:hover{background-color:#a71d2a}
+button.secondary{background-color:#6c757d}
+button.secondary:hover{background-color:#5a6268}
+.hidden{display:none!important}
+.small{font-size:14px;color:#666}
+.product{
+  border:1px solid #ddd;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:6px;
+  background:#fff;
+}
+.price{font-weight:bold;color:#007BFF;font-size:18px}
+#message{
+  font-weight:bold;
+  color:#d9534f;
+  margin-bottom:15px;
+  overflow-wrap:anywhere;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
-    <div id="message"></div>
 
-    <section id="account">
-        <h2>Hesap İşlemleri</h2>
-        
-        <div id="authForms">
-            <input type="text" id="fullName" placeholder="Ad Soyad (Sadece kayıt için)" />
-            <input type="email" id="authEmail" placeholder="E-posta adresiniz" required />
-            <input type="password" id="authPassword" placeholder="Şifreniz (En az 6 karakter)" required />
-            <div style="margin-top: 10px;">
-                <button type="button" id="signInButton">Giriş Yap</button>
-                <button type="button" id="signUpButton" class="secondary">Üye Ol</button>
-                <button type="button" id="forgotButton" class="secondary">Şifremi Unuttum</button>
-            </div>
-        </div>
-                <div id="loggedIn" class="hidden">
-            <p id="userEmail" style="font-weight: bold;"></p>
-            <p>Mağaza Durumu: <span id="storeStatus">Yok</span> | Ürün Sayısı: <span id="productCount">0</span></p>
-            <button type="button" id="signOutButton" class="danger">Oturumu Kapat</button>
-        </div>
+<div id="message"></div>
 
-        <div id="resetBox" class="hidden">
-            <h3>Yeni Şifre Belirle</h3>
-            <input type="password" id="newPassword" placeholder="Yeni Şifre (En az 6 karakter)" />
-            <input type="password" id="newPasswordAgain" placeholder="Yeni Şifre (Tekrar)" />
-            <button type="button" onclick="updatePassword()">Şifreyi Güncelle</button>
-        </div>
-    </section>
-        <section id="sellerSection">
-        <h2>Mağazam</h2>
-        <div id="myStore">
-            <p class="small">Henüz giriş yapılmadı veya mağazanız bulunmuyor.</p>
-        </div>
+<section id="account">
+  <h2>Hesap İşlemleri</h2>
 
-        <h3>Mağaza Aç</h3>
-        <form id="sellerForm">
-            <input type="text" id="storeName" placeholder="Mağaza Adı" required />
-            <select id="category">
-                <option value="Genel">Genel</option>
-                <option value="Teknoloji">Teknoloji</option>
-                <option value="Giyim">Giyim</option>
-                <option value="Dijital">Dijital Ürünler</option>
-            </select>
-            <textarea id="storeDescription" placeholder="Mağaza Açıklaması"></textarea>
-            <button type="submit">Mağazayı Oluştur</button>
-            <div id="sellerMessage" class="small"></div>
-        </form>
-        </section>
-            <section id="productSection">
-        <h2>Ürün Ekle</h2>
-        <form id="productForm">
-            <input type="text" id="productName" placeholder="Ürün Adı" required />
-            <input type="number" id="productPrice" placeholder="Fiyat (TL)" required />
-            <select id="productType">
-                <option value="physical">Fiziksel Ürün</option>
-                <option value="digital">Dijital Ürün</option>
-            </select>
-            <input type="text" id="productImage" placeholder="Ürün Görsel URL'si (İsteğe bağlı)" />
-            <textarea id="productDescription" placeholder="Ürün Açıklaması"></textarea>
-            <button type="submit">Ürünü Pazaryerine Ekle</button>
-            <div id="productMessage" class="small"></div>
-        </form>
+  <div id="authForms">
+    <input type="text" id="fullName" placeholder="Ad Soyad (Sadece kayıt için)">
+    <input type="email" id="authEmail" placeholder="E-posta adresiniz">
+    <input type="password" id="authPassword" placeholder="Şifreniz (En az 6 karakter)">
 
-        <h3>Mağazamdaki Ürünler</h3>
-        <div id="myProducts">
-            <p class="small">Ürünlerinizi görmek için giriş yapın.</p>
-        </div>
-            </section>
-                <section id="market">
-        <h2>Pazaryeri Ürünleri</h2>
-        <input type="text" id="search" placeholder="Ürün veya açıklama ara..." />
-        <div id="products">
-            <p class="small">Ürünler yükleniyor...</p>
-        </div>
-    </section>
+    <div style="margin-top:10px">
+      <button type="button" id="signInButton">Giriş Yap</button>
+      <button type="button" id="signUpButton" class="secondary">Üye Ol</button>
+      <button type="button" id="forgotButton" class="secondary">Şifremi Unuttum</button>
+    </div>
+  </div>
 
-    <script>
-    "use strict";  
+  <div id="loggedIn" class="hidden">
+    <p id="userEmail" style="font-weight:bold"></p>
+    <p>
+      Mağaza Durumu: <span id="storeStatus">Yok</span>
+      | Ürün Sayısı: <span id="productCount">0</span>
+    </p>
+    <button type="button" id="signOutButton" class="danger">Oturumu Kapat</button>
+  </div>
 
-    const SUPABASE_URL = "https://udlqaozwbvnecbcrlvxq.supabase.co";  
-    const SUPABASE_KEY = "sb_publishable_TBNKOEkqddjxV2yNvKZm7A_N1KdpQ-S";  
-    const SITE_URL = "https://kadir5938.github.io/nexora-ai-global/";  
-            let db = null;  
-    let currentUser = null;  
-    let myStore = null;  
-    let allProducts = [];  
-    let myProductList = [];  
-    let recoveryMode = false;  
-    let loadingAuth = false;  
+  <div id="resetBox" class="hidden">
+    <h3>Yeni Şifre Belirle</h3>
+    <input type="password" id="newPassword" placeholder="Yeni Şifre (En az 6 karakter)">
+    <input type="password" id="newPasswordAgain" placeholder="Yeni Şifre (Tekrar)">
+    <button type="button" id="updatePasswordButton">Şifreyi Güncelle</button>
+  </div>
+</section>
 
-    function $(id){ return document.getElementById(id); }  
-    function message(text){ if($("message")) $("message").textContent = text; }  
-    function go(id){ $(id)?.scrollIntoView({behavior:"smooth"}); }  
-    function escapeHTML(value){  
-      return String(value ?? "").replace(/[&<>"']/g, c => ({  
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"  
-      }[c]));  
-    }  
-    function showNotice(id,text){ if($(id)) $(id).textContent = text; }  
-            window.onerror = function(msg, source, line){  
-      message("Sistem hatası: " + msg + " | Satır: " + line);  
-    };  
-    window.addEventListener("unhandledrejection", event => {  
-      message("İşlem hatası: " + (event.reason?.message || String(event.reason)));  
-    });  
+<section id="sellerSection">
+  <h2>Mağazam</h2>
 
-    function initializeSupabase(){  
-      if(!window.supabase?.createClient){  
-        message("Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");  
-        return false;  
-      }  
-      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {  
-        auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }  
-      });  
-      return true;  
-    }  
+  <div id="myStore">
+    <p class="small">Henüz giriş yapılmadı veya mağazanız bulunmuyor.</p>
+  </div>
 
-    function setAuthLoading(value){  
-      loadingAuth = value;  
-    }  
-            function updateAccount(){  
-      const logged = !!currentUser && !recoveryMode;  
-      if($("authForms")) $("authForms").classList.toggle("hidden", logged || recoveryMode);  
-      if($("loggedIn")) $("loggedIn").classList.toggle("hidden", !logged);  
-      if($("resetBox")) $("resetBox").classList.toggle("hidden", !recoveryMode);  
-      if($("userEmail")) $("userEmail").textContent = logged ? "Giriş yapan: " + currentUser.email : "";  
-    }  
+  <h3>Mağaza Aç</h3>
 
-    function showResetBox(){  
-      recoveryMode = true;  
-      updateAccount();  
-      message("Yeni şifrenizi belirleyebilirsiniz.");  
-      go("account");  
-    }  
-            async function signUp(){  
-      if(loadingAuth || !db) return;  
-      const nameEl = $("fullName"), emailEl = $("authEmail"), passEl = $("authPassword");
-      const name = nameEl ? nameEl.value.trim() : "";  
-      const email = emailEl ? emailEl.value.trim() : "";  
-      const password = passEl ? passEl.value : "";  
-      
-      if(!email || password.length < 6){   
-        message("Geçerli bir e-posta ve en az 6 karakterli şifre girin.");   
-        return;   
-      }  
-      try{  
-        setAuthLoading(true); message("Üyeliğiniz oluşturuluyor...");  
-        const {data, error} = await db.auth.signUp({  
-          email, password,  
-          options: { data: { full_name: name }, emailRedirectTo: SITE_URL }  
-        });  
-        if(error) throw error;  
-        if(data.session){  
-          currentUser = data.user; recoveryMode = false; updateAccount();  
-          message("Üyeliğiniz tamamlandı. Hoş geldiniz!");  
-          await loadUser();  
-        } else {  
-          message("Kayıt başarılı. E-postanıza gelen bağlantıya tıklayın, ardından giriş yapın.");  
-        }  
-      } catch(error){ console.error(error); message("Kayıt hatası: " + error.message); }  
-      finally { setAuthLoading(false); }  
-    }  
-            async function signIn(){  
-      if(loadingAuth || !db) return;  
-      const emailEl = $("authEmail"), passEl = $("authPassword");
-      const email = emailEl ? emailEl.value.trim() : ""; 
-      const password = passEl ? passEl.value : "";  
-      
-      if(!email || !password){ message("E-posta ve şifrenizi girin."); return; }  
-      try{  
-        setAuthLoading(true); message("Giriş yapılıyor...");  
-        const {data, error} = await db.auth.signInWithPassword({email, password});  
-        if(error) throw error;  
-        currentUser = data.user; recoveryMode = false; updateAccount();  
-        message("Giriş başarılı! Hoş geldiniz.");  
-        await loadUser();  
-      } catch(error){ console.error(error); message("Giriş hatası: " + error.message); }  
-      finally { setAuthLoading(false); }  
-    }  
-            async function forgotPassword(){  
-      if(loadingAuth || !db) return;  
-      const emailEl = $("authEmail");
-      const email = emailEl ? emailEl.value.trim() : "";  
-      if(!email){ message("Önce e-posta adresinizi yazın."); emailEl?.focus(); return; }  
-      try{  
-        setAuthLoading(true); message("Şifre yenileme bağlantısı gönderiliyor...");  
-        const {error} = await db.auth.resetPasswordForEmail(email, {redirectTo: SITE_URL});  
-        if(error) throw error;  
-        message("Şifre yenileme bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");  
-      } catch(error){ message("Şifre yenileme hatası: " + error.message); }  
-      finally { setAuthLoading(false); }  
-    }  
+  <form id="sellerForm">
+    <input type="text" id="storeName" placeholder="Mağaza Adı" required>
 
-    async function updatePassword(){  
-      if(loadingAuth || !db) return;  
-      const password = $("newPassword")?.value || "", again = $("newPasswordAgain")?.value || "";  
-      if(password.length < 6){ message("Yeni şifreniz en az 6 karakter olmalıdır."); return; }  
-      if(password !== again){ message("Girdiğiniz şifreler eşleşmiyor."); return; }  
-      try{  
-        setAuthLoading(true); message("Yeni şifreniz kaydediliyor...");  
-        const {error} = await db.auth.updateUser({password});  
-        if(error) throw error;  
-        await db.auth.signOut();  
-        currentUser = null; myStore = null; recoveryMode = false;  
-        if($("newPassword")) $("newPassword").value = ""; 
-        if($("newPasswordAgain")) $("newPasswordAgain").value = "";  
-        updateAccount(); await updateDashboard();  
-        message("Şifreniz değiştirildi. Yeni şifrenizle giriş yapabilirsiniz.");  
-      } catch(error){ message("Şifre güncellenemedi: " + error.message); }  
-      finally { setAuthLoading(false); }  
-    }  
-            async function signOutUser(){  
-      if(!db) return;  
-      const {error} = await db.auth.signOut();  
-      if(error){ message("Çıkış hatası: " + error.message); return; }  
-      currentUser = null; myStore = null; recoveryMode = false;  
-      myProductList = [];  
-      updateAccount(); await updateDashboard();  
-      message("Oturum kapatıldı.");  
-    }  
+    <select id="category">
+      <option value="Genel">Genel</option>
+      <option value="Teknoloji">Teknoloji</option>
+      <option value="Giyim">Giyim</option>
+      <option value="Dijital">Dijital Ürünler</option>
+    </select>
 
-    async function loadUser(){  
-      if(!db || recoveryMode) return;  
-      const {data, error} = await db.auth.getUser();  
-      if(error) console.error("Kullanıcı alma hatası:", error);  
-      currentUser = data?.user || null;  
-      updateAccount();  
-      if(currentUser) await loadMyStore(); else myStore = null;  
-      await loadProducts();  
-      await updateDashboard();  
-    }  
+    <textarea id="storeDescription" placeholder="Mağaza Açıklaması"></textarea>
 
-    async function loadMyStore(){  
-      if(!currentUser) { myStore = null; return; }  
-      const {data, error} = await db.from("stores").select("*").eq("owner_id", currentUser.id).limit(1).maybeSingle();  
-      if(error){ console.error("Mağaza yükleme hatası:", error); showNotice("sellerMessage", "Mağaza bilgisi alınamadı: " + error.message); return; }  
-      myStore = data;  
-    }  
-            $("sellerForm")?.addEventListener("submit", async function(e){  
-      e.preventDefault();  
-      if(!currentUser){ showNotice("sellerMessage", "Önce giriş yapmalısınız."); go("account"); return; }  
-      if(myStore){ showNotice("sellerMessage", "Zaten bir mağazanız var."); return; }  
-      const name = $("storeName").value.trim();  
-      if(!name){ showNotice("sellerMessage", "Mağaza adı zorunludur."); return; }  
-      const store = {  
-        owner_id: currentUser.id,  
-        name,  
-        category: $("category").value,  
-        description: $("storeDescription").value.trim() || null,  
-        email: currentUser.email,  
-        status: "active",  
-        is_active: true  
-      };  
-      try{  
-        const {data, error} = await db.from("stores").insert(store).select().single();  
-        if(error) throw error;  
-        myStore = data;  
-        showNotice("sellerMessage", "Mağazanız başarıyla oluşturuldu!");  
-        this.reset();  
-        await updateDashboard();  
-      } catch(error){  
-        showNotice("sellerMessage", "Mağaza oluşturulamadı: " + error.message);  
-      }  
-    });  
+    <button type="submit">Mağazayı Oluştur</button>
+    <div id="sellerMessage" class="small"></div>
+  </form>
+</section>
 
-    $("productForm")?.addEventListener("submit", async function(e){  
-      e.preventDefault();  
-      if(!currentUser){ showNotice("productMessage", "Ürün eklemek için giriş yapmalısınız."); go("account"); return; }  
-      if(!myStore){ showNotice("productMessage", "Önce mağazanızı oluşturun."); go("sellerSection"); return; }  
-      const price = Number($("productPrice").value);  
-      if(!Number.isFinite(price) || price <= 0){ showNotice("productMessage", "Geçerli bir fiyat girin."); return; }  
-      const product = {  
-        store_id: myStore.id,  
-        name: $("productName").value.trim(),  
-        description: $("productDescription").value.trim() || null,  
-        price,  
-        product_type: $("productType").value,  
-        image_url: $("productImage").value.trim() || null,  
-        status: "active",  
-        is_active: true  
-      };  
-      try{  
-        const {error} = await db.from("products").insert(product);  
-        if(error) throw error;  
-        showNotice("productMessage", "Ürününüz pazaryerine eklendi!");  
-        this.reset();  
-        await loadProducts(); await updateDashboard(); go("market");  
-      } catch(error){ showNotice("productMessage", "Ürün eklenemedi: " + error.message); }  
-    });  
-            async function loadProducts(){  
-      const area = $("products");  
-      if(!area || !db) return;  
-      area.innerHTML = '<p class="small">Ürünler yükleniyor...</p>';  
-      try{  
-        const {data, error} = await db.from("products").select("*").eq("is_active", true).eq("status", "active").order("created_at", {ascending: false});  
-        if(error) throw error;  
-        allProducts = data || [];  
-        renderProducts();  
-      } catch(error){  
-        area.innerHTML = '<p class="small">Ürünler yüklenemedi: ' + escapeHTML(error.message) + '</p>';  
-      }  
-    }  
+<section id="productSection">
+  <h2>Ürün Ekle</h2>
 
-    function renderProducts(list){  
-      const area = $("products"); if(!area) return;  
-      const q = $("search") ? $("search").value.toLocaleLowerCase("tr") : "";  
-      const items = (list || allProducts).filter(p =>  
-        String(p.name || "").toLocaleLowerCase("tr").includes(q) ||  
-        String(p.description || "").toLocaleLowerCase("tr").includes(q)  
-      );  
-      if(!items.length){ area.innerHTML = '<p class="small">Aramanıza uygun ürün bulunamadı.</p>'; return; }  
-      area.innerHTML = items.map(p => `  
-        <article class="product">  
-          ${p.image_url ? `<img src="${escapeHTML(p.image_url)}" alt="Ürün görseli" class="product-img" style="max-width:100px;display:block;" onerror="this.style.display='none'">` : '<div style="font-size:38px;text-align:center;padding:10px;">📦</div>'}  
-          <h3>${escapeHTML(p.name)}</h3>  
-          <p class="small">${escapeHTML(p.description || "")}</p>  
-          <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>  
-          <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>  
-        </article>`).join("");  
-    }  
-    if($("search")) $("search").addEventListener("input", () => renderProducts());  
-            async function updateDashboard(){  
-      if(!currentUser){  
-        if($("productCount")) $("productCount").textContent = "0";  
-        if($("storeStatus")) $("storeStatus").textContent = "Yok";  
-        if($("myStore")) $("myStore").textContent = "Henüz giriş yapılmadı.";  
-        if($("myProducts")) $("myProducts").innerHTML = '<p class="small">Ürünlerinizi görmek için giriş yapın.</p>';  
-        return;  
-      }  
-      
-      if(myStore){  
-        if($("storeStatus")) $("storeStatus").textContent = "Aktif";  
-        if($("myStore")) $("myStore").innerHTML = `  
-          <p><strong>Mağaza Adı:</strong> ${escapeHTML(myStore.name)}</p>  
-          <p><strong>Kategori:</strong> ${escapeHTML(myStore.category || "Genel")}</p>  
-          <p class="small">${escapeHTML(myStore.description || "Açıklama girilmedi.")}</p>  
-        `;  
-        try {  
-          const {data, error} = await db.from("products").select("*").eq("store_id", myStore.id).order("created_at", {ascending: false});  
-          if(error) throw error;  
-          myProductList = data || [];  
-          if($("productCount")) $("productCount").textContent = String(myProductList.length);  
-          renderMyProducts();  
-        } catch(err){  
-          if($("myProducts")) $("myProducts").innerHTML = '<p class="small">Ürünleriniz yüklenirken hata oluştu.</p>';  
-        }  
-      } else {  
-        if($("storeStatus")) $("storeStatus").textContent = "Yok";  
-        if($("productCount")) $("productCount").textContent = "0";  
-        if($("myStore")) $("myStore").innerHTML = '<p class="small">Henüz mağaza açmadınız. Mağaza Aç bölümünden hemen oluşturabilirsiniz.</p>';  
-        if($("myProducts")) $("myProducts").innerHTML = '<p class="small">Mağazanız olmadığı için ürün bulunmuyor.</p>';  
-      }  
-    }  
+  <form id="productForm">
+    <input type="text" id="productName" placeholder="Ürün Adı" required>
+    <input type="number" id="productPrice" placeholder="Fiyat (TL)" min="0.01" step="0.01" required>
 
-    function renderMyProducts(){  
-      const area = $("myProducts");  
-      if(!area) return;  
-      if(!myProductList.length){ area.innerHTML = '<p class="small">Henüz yayınlanmış bir ürününüz bulunmuyor.</p>'; return; }  
-      area.innerHTML = myProductList.map(p => `  
-        <article class="product">  
-          <h3>${escapeHTML(p.name)}</h3>  
-          <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>  
-          <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>  
-          <button type="button" class="danger" onclick="deleteProduct('${p.id}')">Ürünü Sil</button>  
-        </article>  
-      `).join("");  
-    }  
+    <select id="productType">
+      <option value="physical">Fiziksel Ürün</option>
+      <option value="digital">Dijital Ürün</option>
+    </select>
 
-    async function deleteProduct(id){  
-      if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;  
-      try{  
-        const {error} = await db.from("products").delete().eq("id", id);  
-        if(error) throw error;  
-        await loadProducts();  
-        await updateDashboard();  
-      } catch(error){  
-        alert("Ürün silinemedi: " + error.message);  
-      }  
-    }  
-            document.addEventListener("DOMContentLoaded", () => {  
-      if(initializeSupabase()){  
-        db.auth.onAuthStateChange((event, session) => {  
-          if(event === "PASSWORD_RECOVERY"){  
-            showResetBox();  
-          } else {  
-            currentUser = session?.user || null;  
-            loadUser();  
-          }  
-        });  
-      }  
+    <input type="text" id="productImage" placeholder="Ürün Görsel URL'si (İsteğe bağlı)">
+    <textarea id="productDescription" placeholder="Ürün Açıklaması"></textarea>
 
-      $("signUpButton")?.addEventListener("click", (e) => { e.preventDefault(); signUp(); });
-      $("signInButton")?.addEventListener("click", (e) => { e.preventDefault(); signIn(); });
-      $("forgotButton")?.addEventListener("click", (e) => { e.preventDefault(); forgotPassword(); });
-      $("signOutButton")?.addEventListener("click", (e) => { e.preventDefault(); signOutUser(); });
-    });  
-    </script>
+    <button type="submit">Ürünü Pazaryerine Ekle</button>
+    <div id="productMessage" class="small"></div>
+  </form>
+
+  <h3>Mağazamdaki Ürünler</h3>
+  <div id="myProducts">
+    <p class="small">Ürünlerinizi görmek için giriş yapın.</p>
+  </div>
+</section>
+
+<section id="market">
+  <h2>Pazaryeri Ürünleri</h2>
+  <input type="text" id="search" placeholder="Ürün veya açıklama ara...">
+  <div id="products">
+    <p class="small">Ürünler yükleniyor...</p>
+  </div>
+</section>
+
+<script>
+"use strict";
+
+/* SUPABASE AYARLARI */
+const SUPABASE_URL = "https://udlqaozwbvnecbcrlvxq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TBNKOEkqddjxV2yNvKZm7A_N1KdpQ-S";
+const SITE_URL = "https://kadir5938.github.io/nexora-ai-global/";
+
+let db = null;
+let currentUser = null;
+let myStore = null;
+let allProducts = [];
+let myProductList = [];
+let recoveryMode = false;
+let loadingAuth = false;
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function message(text){
+  if($("message")) $("message").textContent = text;
+}
+
+function go(id){
+  $(id)?.scrollIntoView({behavior:"smooth"});
+}
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
+
+function showNotice(id,text){
+  if($(id)) $(id).textContent = text;
+}
+
+/* HATALARI GÖSTER */
+window.onerror = function(msg,source,line){
+  message("Sistem hatası: " + msg + " | Satır: " + line);
+};
+
+window.addEventListener("unhandledrejection",event => {
+  message("İşlem hatası: " +
+    (event.reason?.message || String(event.reason)));
+});
+
+/* SUPABASE BAĞLANTISI */
+function initializeSupabase(){
+  if(!window.supabase?.createClient){
+    message("Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");
+    return false;
+  }
+
+  try{
+    db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+      {
+        auth:{
+          detectSessionInUrl:true,
+          persistSession:true,
+          autoRefreshToken:true
+        }
+      }
+    );
+
+    return true;
+  }catch(error){
+    message("Supabase başlatılamadı: " + error.message);
+    return false;
+  }
+}
+
+function setAuthLoading(value){
+  loadingAuth = value;
+
+  ["signInButton","signUpButton","forgotButton"].forEach(id => {
+    if($(id)) $(id).disabled = value;
+  });
+}
+
+function checkDatabase(){
+  if(!db){
+    message("Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.");
+    return false;
+  }
+  return true;
+}
+
+/* HESAP EKRANI */
+function updateAccount(){
+  const logged = !!currentUser && !recoveryMode;
+
+  if($("authForms")){
+    $("authForms").classList.toggle("hidden",logged || recoveryMode);
+  }
+
+  if($("loggedIn")){
+    $("loggedIn").classList.toggle("hidden",!logged);
+  }
+
+  if($("resetBox")){
+    $("resetBox").classList.toggle("hidden",!recoveryMode);
+  }
+
+  if($("userEmail")){
+    $("userEmail").textContent =
+      logged ? "Giriş yapan: " + currentUser.email : "";
+  }
+}
+
+function showResetBox(){
+  recoveryMode = true;
+  updateAccount();
+  message("Yeni şifrenizi belirleyebilirsiniz.");
+  go("account");
+}
+
+/* ÜYE OL */
+async function signUp(){
+  if(loadingAuth) return;
+  if(!checkDatabase()) return;
+
+  const name = $("fullName")?.value.trim() || "";
+  const email = $("authEmail")?.value.trim() || "";
+  const password = $("authPassword")?.value || "";
+
+  if(!email || password.length < 6){
+    message("Geçerli bir e-posta ve en az 6 karakterli şifre girin.");
+    return;
+  }
+
+  try{
+    setAuthLoading(true);
+    message("Üyeliğiniz oluşturuluyor...");
+
+    const {data,error} = await db.auth.signUp({
+      email,
+      password,
+      options:{
+        data:{full_name:name},
+        emailRedirectTo:SITE_URL
+      }
+    });
+
+    if(error) throw error;
+
+    if(data.session){
+      currentUser = data.user;
+      recoveryMode = false;
+      updateAccount();
+      message("Üyeliğiniz tamamlandı. Hoş geldiniz!");
+      await loadUser();
+    }else{
+      message("Kayıt başarılı. E-postanıza gelen bağlantıya tıklayın, ardından giriş yapın.");
+    }
+  }catch(error){
+    console.error(error);
+    message("Kayıt hatası: " + error.message);
+  }finally{
+    setAuthLoading(false);
+  }
+}
+
+/* GİRİŞ YAP */
+async function signIn(){
+  if(loadingAuth) return;
+  if(!checkDatabase()) return;
+
+  const email = $("authEmail")?.value.trim() || "";
+  const password = $("authPassword")?.value || "";
+
+  if(!email || !password){
+    message("E-posta ve şifrenizi girin.");
+    return;
+  }
+
+  try{
+    setAuthLoading(true);
+    message("Giriş yapılıyor...");
+
+    const {data,error} = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if(error) throw error;
+
+    currentUser = data.user;
+    recoveryMode = false;
+    updateAccount();
+
+    message("Giriş başarılı! Hoş geldiniz.");
+    await loadUser();
+  }catch(error){
+    console.error(error);
+    message("Giriş hatası: " + error.message);
+  }finally{
+    setAuthLoading(false);
+  }
+}
+
+/* ŞİFREMİ UNUTTUM */
+async function forgotPassword(){
+  if(loadingAuth) return;
+  if(!checkDatabase()) return;
+
+  const emailEl = $("authEmail");
+  const email = emailEl?.value.trim() || "";
+
+  if(!email){
+    message("Önce e-posta adresinizi yazın.");
+    emailEl?.focus();
+    return;
+  }
+
+  try{
+    setAuthLoading(true);
+    message("Şifre yenileme bağlantısı gönderiliyor...");
+
+    const {error} = await db.auth.resetPasswordForEmail(email,{
+      redirectTo:SITE_URL
+    });
+
+    if(error) throw error;
+
+    message("Şifre yenileme bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");
+  }catch(error){
+    message("Şifre yenileme hatası: " + error.message);
+  }finally{
+    setAuthLoading(false);
+  }
+}
+
+/* YENİ ŞİFRE */
+async function updatePassword(){
+  if(loadingAuth) return;
+  if(!checkDatabase()) return;
+
+  const password = $("newPassword")?.value || "";
+  const again = $("newPasswordAgain")?.value || "";
+
+  if(password.length < 6){
+    message("Yeni şifreniz en az 6 karakter olmalıdır.");
+    return;
+  }
+
+  if(password !== again){
+    message("Girdiğiniz şifreler eşleşmiyor.");
+    return;
+  }
+
+  try{
+    setAuthLoading(true);
+    message("Yeni şifreniz kaydediliyor...");
+
+    const {error} = await db.auth.updateUser({password});
+
+    if(error) throw error;
+
+    await db.auth.signOut();
+
+    currentUser = null;
+    myStore = null;
+    recoveryMode = false;
+
+    $("newPassword").value = "";
+    $("newPasswordAgain").value = "";
+
+    updateAccount();
+    await updateDashboard();
+
+    message("Şifreniz değiştirildi. Yeni şifrenizle giriş yapabilirsiniz.");
+  }catch(error){
+    message("Şifre güncellenemedi: " + error.message);
+  }finally{
+    setAuthLoading(false);
+  }
+}
+
+/* OTURUM KAPAT */
+async function signOutUser(){
+  if(!checkDatabase()) return;
+
+  try{
+    const {error} = await db.auth.signOut();
+    if(error) throw error;
+
+    currentUser = null;
+    myStore = null;
+    myProductList = [];
+    recoveryMode = false;
+
+    updateAccount();
+    await updateDashboard();
+
+    message("Oturum kapatıldı.");
+  }catch(error){
+    message("Çıkış hatası: " + error.message);
+  }
+}
+
+/* KULLANICIYI YÜKLE */
+async function loadUser(){
+  if(!db || recoveryMode) return;
+
+  const {data,error} = await db.auth.getUser();
+
+  if(error){
+    console.error("Kullanıcı alma hatası:",error);
+  }
+
+  currentUser = data?.user || null;
+
+  updateAccount();
+
+  if(currentUser){
+    await loadMyStore();
+  }else{
+    myStore = null;
+  }
+
+  await loadProducts();
+  await updateDashboard();
+}
+
+/* MAĞAZAYI YÜKLE */
+async function loadMyStore(){
+  if(!currentUser){
+    myStore = null;
+    return;
+  }
+
+  const {data,error} = await db
+    .from("stores")
+    .select("*")
+    .eq("owner_id",currentUser.id)
+    .limit(1)
+    .maybeSingle();
+
+  if(error){
+    console.error("Mağaza yükleme hatası:",error);
+    showNotice("sellerMessage","Mağaza bilgisi alınamadı: " + error.message);
+    return;
+  }
+
+  myStore = data;
+}
+
+/* MAĞAZA OLUŞTUR */
+$("sellerForm").addEventListener("submit",async function(e){
+  e.preventDefault();
+
+  if(!currentUser){
+    showNotice("sellerMessage","Önce giriş yapmalısınız.");
+    go("account");
+    return;
+  }
+
+  if(myStore){
+    showNotice("sellerMessage","Zaten bir mağazanız var.");
+    return;
+  }
+
+  const name = $("storeName").value.trim();
+
+  if(!name){
+    showNotice("sellerMessage","Mağaza adı zorunludur.");
+    return;
+  }
+
+  const store = {
+    owner_id:currentUser.id,
+    name,
+    category:$("category").value,
+    description:$("storeDescription").value.trim() || null,
+    email:currentUser.email,
+    status:"active",
+    is_active:true
+  };
+
+  try{
+    const {data,error} = await db
+      .from("stores")
+      .insert(store)
+      .select()
+      .single();
+
+    if(error) throw error;
+
+    myStore = data;
+
+    showNotice("sellerMessage","Mağazanız başarıyla oluşturuldu!");
+    this.reset();
+
+    await updateDashboard();
+  }catch(error){
+    showNotice("sellerMessage","Mağaza oluşturulamadı: " + error.message);
+  }
+});
+
+/* ÜRÜN EKLE */
+$("productForm").addEventListener("submit",async function(e){
+  e.preventDefault();
+
+  if(!currentUser){
+    showNotice("productMessage","Ürün eklemek için giriş yapmalısınız.");
+    go("account");
+    return;
+  }
+
+  if(!myStore){
+    showNotice("productMessage","Önce mağazanızı oluşturun.");
+    go("sellerSection");
+    return;
+  }
+
+  const price = Number($("productPrice").value);
+
+  if(!Number.isFinite(price) || price <= 0){
+    showNotice("productMessage","Geçerli bir fiyat girin.");
+    return;
+  }
+
+  const product = {
+    store_id:myStore.id,
+    name:$("productName").value.trim(),
+    description:$("productDescription").value.trim() || null,
+    price,
+    product_type:$("productType").value,
+    image_url:$("productImage").value.trim() || null,
+    status:"active",
+    is_active:true
+  };
+
+  try{
+    const {error} = await db.from("products").insert(product);
+
+    if(error) throw error;
+
+    showNotice("productMessage","Ürününüz pazaryerine eklendi!");
+
+    this.reset();
+
+    await loadProducts();
+    await updateDashboard();
+    go("market");
+  }catch(error){
+    showNotice("productMessage","Ürün eklenemedi: " + error.message);
+  }
+});
+
+/* PAZARYERİ ÜRÜNLERİ */
+async function loadProducts(){
+  const area = $("products");
+
+  if(!area || !db) return;
+
+  area.innerHTML = '<p class="small">Ürünler yükleniyor...</p>';
+
+  try{
+    const {data,error} = await db
+      .from("products")
+      .select("*")
+      .eq("is_active",true)
+      .eq("status","active")
+      .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    allProducts = data || [];
+    renderProducts();
+  }catch(error){
+    area.innerHTML =
+      '<p class="small">Ürünler yüklenemedi: ' +
+      escapeHTML(error.message) + '</p>';
+  }
+}
+
+function renderProducts(){
+  const area = $("products");
+  if(!area) return;
+
+  const q = $("search").value.toLocaleLowerCase("tr");
+
+  const items = allProducts.filter(p =>
+    String(p.name || "").toLocaleLowerCase("tr").includes(q) ||
+    String(p.description || "").toLocaleLowerCase("tr").includes(q)
+  );
+
+  if(!items.length){
+    area.innerHTML = '<p class="small">Aramanıza uygun ürün bulunamadı.</p>';
+    return;
+  }
+
+  area.innerHTML = items.map(p => `
+    <article class="product">
+      ${
+        p.image_url
+        ? `<img src="${escapeHTML(p.image_url)}"
+             alt="Ürün görseli"
+             style="max-width:100px;display:block"
+             onerror="this.style.display='none'">`
+        : '<div style="font-size:38px;text-align:center;padding:10px">📦</div>'
+      }
+      <h3>${escapeHTML(p.name)}</h3>
+      <p class="small">${escapeHTML(p.description || "")}</p>
+      <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>
+      <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>
+    </article>
+  `).join("");
+}
+
+$("search").addEventListener("input",renderProducts);
+
+/* KONTROL PANELİ */
+async function updateDashboard(){
+  if(!currentUser){
+    $("productCount").textContent = "0";
+    $("storeStatus").textContent = "Yok";
+    $("myStore").textContent = "Henüz giriş yapılmadı.";
+    $("myProducts").innerHTML =
+      '<p class="small">Ürünlerinizi görmek için giriş yapın.</p>';
+    return;
+  }
+
+  if(myStore){
+    $("storeStatus").textContent = "Aktif";
+
+    $("myStore").innerHTML = `
+      <p><strong>Mağaza Adı:</strong> ${escapeHTML(myStore.name)}</p>
+      <p><strong>Kategori:</strong> ${escapeHTML(myStore.category || "Genel")}</p>
+      <p class="small">${escapeHTML(myStore.description || "Açıklama girilmedi.")}</p>
+    `;
+
+    try{
+      const {data,error} = await db
+        .from("products")
+        .select("*")
+        .eq("store_id",myStore.id)
+        .order("created_at",{ascending:false});
+
+      if(error) throw error;
+
+      myProductList = data || [];
+      $("productCount").textContent = String(myProductList.length);
+
+      renderMyProducts();
+    }catch(err){
+      $("myProducts").innerHTML =
+        '<p class="small">Ürünleriniz yüklenirken hata oluştu: ' +
+        escapeHTML(err.message) + '</p>';
+    }
+  }else{
+    $("storeStatus").textContent = "Yok";
+    $("productCount").textContent = "0";
+
+    $("myStore").innerHTML =
+      '<p class="small">Henüz mağaza açmadınız. Mağaza Aç bölümünden hemen oluşturabilirsiniz.</p>';
+
+    $("myProducts").innerHTML =
+      '<p class="small">Mağazanız olmadığı için ürün bulunmuyor.</p>';
+  }
+}
+
+/* MAĞAZA ÜRÜNLERİ */
+function renderMyProducts(){
+  const area = $("myProducts");
+  if(!area) return;
+
+  if(!myProductList.length){
+    area.innerHTML =
+      '<p class="small">Henüz yayınlanmış bir ürününüz bulunmuyor.</p>';
+    return;
+  }
+
+  area.innerHTML = myProductList.map(p => `
+    <article class="product">
+      <h3>${escapeHTML(p.name)}</h3>
+      <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>
+      <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>
+      <button type="button" class="danger" data-delete-id="${escapeHTML(p.id)}">Ürünü Sil</button>
+    </article>
+  `).join("");
+
+  area.querySelectorAll("[data-delete-id]").forEach(button => {
+    button.addEventListener("click",() => {
+      deleteProduct(button.dataset.deleteId);
+    });
+  });
+}
+
+/* ÜRÜN SİL */
+async function deleteProduct(id){
+  if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+
+  try{
+    const {error} = await db
+      .from("products")
+      .delete()
+      .eq("id",id);
+
+    if(error) throw error;
+
+    await loadProducts();
+    await updateDashboard();
+
+    message("Ürün silindi.");
+  }catch(error){
+    message("Ürün silinemedi: " + error.message);
+  }
+}
+
+/* UYGULAMAYI BAŞLAT */
+function startApp(){
+
+  /* Buton bağlantıları */
+  $("signUpButton").addEventListener("click",signUp);
+  $("signInButton").addEventListener("click",signIn);
+  $("forgotButton").addEventListener("click",forgotPassword);
+  $("signOutButton").addEventListener("click",signOutUser);
+  $("updatePasswordButton").addEventListener("click",updatePassword);
+
+  /* Supabase bağlantısı */
+  if(!initializeSupabase()){
+    return;
+  }
+
+  message("NEXORA bağlantısı hazırlanıyor...");
+
+  db.auth.onAuthStateChange((event,session) => {
+
+    if(event === "PASSWORD_RECOVERY"){
+      showResetBox();
+      return;
+    }
+
+    currentUser = session?.user || null;
+
+    /*
+      Oturum değişikliği callback'i içinde doğrudan
+      Supabase sorgusu çalıştırmamak için ayrı görevde çağırıyoruz.
+    */
+    setTimeout(() => {
+      loadUser().catch(error => {
+        message("Başlangıç hatası: " + error.message);
+      });
+    },0);
+  });
+
+}
+
+startApp();
+</script>
+
 </body>
-</html>
+                                     </html>
+    
