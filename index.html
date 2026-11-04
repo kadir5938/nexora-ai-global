@@ -864,6 +864,82 @@ async function signOutUser(){
     message("Çıkış hatası: "+error.message);
   }
 }
+  function orderCard(o,type){
+  const statusNames={
+    pending:"Beklemede",
+    processing:"Hazırlanıyor",
+    completed:"Tamamlandı",
+    cancelled:"İptal edildi"
+  };
+
+  const date=new Date(o.created_at).toLocaleString("tr-TR");
+  const amount=type==="buyer"?o.subtotal:o.seller_amount;
+
+  return `
+    <article class="product" style="padding:18px;margin-bottom:15px">
+      <div class="product-body">
+        <h3>${escapeHTML(o.product_name)}</h3>
+        <p class="small">Sipariş: ${escapeHTML(o.id)}</p>
+        <p class="small">Tarih: ${date}</p>
+        <p class="small">Adet: ${o.quantity}</p>
+        <div class="price">
+          ${Number(amount||0).toLocaleString("tr-TR",{minimumFractionDigits:2})} TL
+        </div>
+        <p class="small">Durum: ${statusNames[o.order_status]||escapeHTML(o.order_status)}</p>
+        ${type==="seller"?`
+          <p class="small">Platform komisyonu: ${Number(o.commission_amount||0).toFixed(2)} TL</p>
+        `:""}
+        <p class="small">Ödeme: ${o.payment_status==="demo_unpaid"?"Deneme, ödeme alınmadı":escapeHTML(o.payment_status)}</p>
+      </div>
+    </article>
+  `;
+}
+
+async function loadOrders(){
+  const buyerArea=$("myOrders");
+  const sellerArea=$("sellerOrders");
+
+  if(!buyerArea||!sellerArea) return;
+
+  if(!currentUser){
+    buyerArea.innerHTML='<div class="empty-state">Siparişlerini görmek için giriş yap.</div>';
+    sellerArea.innerHTML='<div class="empty-state">Gelen satışlarını görmek için giriş yap.</div>';
+    return;
+  }
+
+  buyerArea.innerHTML='<div class="empty-state">Siparişler yükleniyor...</div>';
+  sellerArea.innerHTML='<div class="empty-state">Satışlar yükleniyor...</div>';
+
+  try{
+    const [buyerResult,sellerResult]=await Promise.all([
+      db.from("orders").select("*")
+        .eq("buyer_id",currentUser.id)
+        .order("created_at",{ascending:false}),
+
+      db.from("orders").select("*")
+        .eq("seller_id",currentUser.id)
+        .order("created_at",{ascending:false})
+    ]);
+
+    if(buyerResult.error) throw buyerResult.error;
+    if(sellerResult.error) throw sellerResult.error;
+
+    const buyerOrders=buyerResult.data||[];
+    const sellerOrders=sellerResult.data||[];
+
+    buyerArea.innerHTML=buyerOrders.length
+      ?buyerOrders.map(o=>orderCard(o,"buyer")).join("")
+      :'<div class="empty-state">Henüz siparişiniz bulunmuyor.</div>';
+
+    sellerArea.innerHTML=sellerOrders.length
+      ?sellerOrders.map(o=>orderCard(o,"seller")).join("")
+      :'<div class="empty-state">Henüz gelen satışınız bulunmuyor.</div>';
+
+  }catch(error){
+    buyerArea.innerHTML='<div class="empty-state">Siparişler yüklenemedi: '+escapeHTML(error.message)+'</div>';
+    sellerArea.innerHTML='<div class="empty-state">Satışlar yüklenemedi: '+escapeHTML(error.message)+'</div>';
+  }
+  }
 async function loadUser(){
   if(!db||recoveryMode) return;
   const {data,error}=await db.auth.getUser();
@@ -1120,8 +1196,10 @@ async function deleteProduct(id){
   try{
     const {error}=await db.from("products").delete().eq("id",id);
     if(error) throw error;
-    await loadProducts();
-    await updateDashboard();
+      await loadProducts();
+  await updateDashboard();
+  await loadOrders();
+  }
     message("Ürün silindi.");
   }catch(error){
     message("Ürün silinemedi: "+error.message);
