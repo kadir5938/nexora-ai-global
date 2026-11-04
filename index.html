@@ -1078,19 +1078,24 @@ function startApp(){
    if(!initializeSupabase()) return;
   message("NEXORA bağlantısı hazırlanıyor...");
 
-  db.auth.onAuthStateChange((event,session)=>{
+    db.auth.onAuthStateChange((event,session)=>{
     if(event==="PASSWORD_RECOVERY"){
-      showResetBox();return;
+      showResetBox();
+      return;
     }
+
     currentUser=session?.user||null;
-    setTimeout(()=>{
-      loadUser().catch(error=>message("Başlangıç hatası: "+error.message));
+
+    setTimeout(async()=>{
+      try{
+        await loadUser();
+        message("NEXORA bağlantısı başarılı!");
+      }catch(error){
+        message("Başlangıç hatası: "+error.message);
+      }
     },0);
   });
-}
-
 startApp();
-alert("NEXORA JavaScript çalışıyor!");
 </script>
 </body>
 </html>
