@@ -801,8 +801,9 @@ function showResetBox(){
     message("Bağlantı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");
   }catch(error){
     message("Şifre yenileme hatası: "+error.message);
-  }finally{setAuthLoading(false)}
-   async function updatePassword(){
+    }finally{setAuthLoading(false)}
+}
+async function updatePassword(){
   if(loadingAuth||!checkDatabase()) return;
   const password=$("newPassword").value;
   const again=$("newPasswordAgain").value;
@@ -865,8 +866,7 @@ async function loadUser(){
   }
   myStore=data;
   }
-  $
-    ("sellerForm").addEventListener("submit",async function(e){
+  $("sellerForm").addEventListener("submit",async function(e){
   e.preventDefault();
   if(!currentUser){
     showNotice("sellerMessage","Önce giriş yapmalısınız.");
