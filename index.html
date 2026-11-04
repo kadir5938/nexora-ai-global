@@ -842,6 +842,7 @@ async function signOutUser(){
 }
 
 async function loadUser(){
+async function loadUser(){
   if(!db||recoveryMode) return;
   const {data,error}=await db.auth.getUser();
   if(error) console.error(error);
@@ -850,7 +851,7 @@ async function loadUser(){
   if(currentUser) await loadMyStore();
   else myStore=null;
   await loadProducts();
-  await updateDashboard()
+  await updateDashboard();
 }
   async function loadMyStore(){
   if(!currentUser){myStore=null;return}
@@ -938,7 +939,6 @@ $("productForm").addEventListener("submit",async function(e){
     showNotice("productMessage","Ürün eklenemedi: "+error.message);
   }
 });
-
 
 async function loadProducts(){
   const area=$("products");
