@@ -840,8 +840,6 @@ async function signOutUser(){
     message("Çıkış hatası: "+error.message);
   }
 }
-
-async function loadUser(){
 async function loadUser(){
   if(!db||recoveryMode) return;
   const {data,error}=await db.auth.getUser();
