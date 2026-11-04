@@ -1076,7 +1076,7 @@ function startApp(){
     link.addEventListener("click",()=>$("navLinks").classList.remove("open"));
   });
    if(!initializeSupabase()) return;
-  message("NEXORA bağlantısı hazırlanıyor...");
+  message("NEXORA bağlantısı başarılı!");
 
     db.auth.onAuthStateChange((event,session)=>{
     if(event==="PASSWORD_RECOVERY"){
