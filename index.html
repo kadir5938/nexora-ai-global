@@ -4,167 +4,653 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexora Mağaza ve Pazaryeri</title>
+<meta name="theme-color" content="#080D1C">
+<meta name="description" content="NEXORA AI GLOBAL - Küresel dijital ticaret platformu.">
+<title>NEXORA AI GLOBAL | Küresel Pazaryeri</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box}
-body{
-  font-family:Arial,sans-serif;
-  max-width:900px;
-  margin:0 auto;
-  padding:20px;
-  line-height:1.6;
-  background-color:#f9f9f9;
-  color:#333;
+:root{
+  --bg:#080D1C;
+  --panel:#111A2D;
+  --panel2:#16223A;
+  --purple:#8064FF;
+  --purple2:#A18CFF;
+  --text:#F5F6FC;
+  --muted:#A7B1C7;
+  --line:rgba(255,255,255,.09);
+  --green:#50D6A0;
+  --radius:20px;
 }
-section{
-  background:#fff;
-  padding:20px;
-  margin-bottom:20px;
-  border-radius:8px;
-  box-shadow:0 2px 4px rgba(0,0,0,.1);
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:95px}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  line-height:1.6;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.container{width:min(1120px,92%);margin:auto}
+.hidden{display:none!important}
+.small{font-size:13px;color:var(--muted)}
+.muted{color:var(--muted)}
+.top-glow{
+  position:fixed;top:-260px;left:50%;
+  transform:translateX(-50%);
+  width:700px;height:500px;
+  background:#6040ff;filter:blur(180px);
+  opacity:.16;pointer-events:none;z-index:-1;
+}
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,13,28,.91);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+.nav{
+  min-height:76px;display:flex;align-items:center;
+  justify-content:space-between;gap:18px;
+}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:1.5px}
+.brand-icon{
+  width:42px;height:42px;border-radius:14px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#A18CFF,#6543E9);
+  color:white;font-size:23px;
+  box-shadow:0 8px 30px #8064ff45;
+}
+.brand-name{font-size:21px}
+.brand-name span{color:var(--purple2)}
+.nav-links{display:flex;align-items:center;gap:23px}
+.nav-links a{font-size:13px;color:#C2C9D8;transition:.2s}
+.nav-links a:hover{color:white}
+.nav-actions{display:flex;gap:9px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;border:0;border-radius:12px;
+  padding:12px 18px;font-weight:750;
+  transition:transform .2s,filter .2s;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.btn-primary{
+  color:white;background:linear-gradient(135deg,#8C70FF,#6244E8);
+  box-shadow:0 8px 25px #7958ff30;
+}
+.btn-outline{
+  background:transparent;color:white;border:1px solid var(--line);
+}
+.btn-danger{background:#9E344A;color:white}
+.btn-secondary{background:#26334D;color:white}
+.menu-toggle{
+  display:none;background:var(--panel2);color:white;
+  border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:20px;
+}
+.hero{padding:76px 0 55px}
+.hero-grid{
+  display:grid;grid-template-columns:1.2fr .8fr;
+  align-items:center;gap:35px;
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  color:#C3B6FF;background:#8064FF19;
+  border:1px solid #8064FF45;
+  padding:7px 12px;border-radius:30px;
+  font-size:12px;font-weight:800;letter-spacing:.7px;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:#8DFFCB}
+h1{
+  font-size:clamp(38px,6vw,66px);
+  line-height:1.08;letter-spacing:-2px;
+  margin:22px 0;
+}
+.gradient-text{
+  background:linear-gradient(90deg,#B5A5FF,#8064FF,#6EDBFF);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-copy{font-size:17px;color:#B3BDD0;max-width:570px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.hero-visual{
+  min-height:340px;border-radius:28px;
+  border:1px solid #A18CFF35;
+  background:
+    radial-gradient(circle at 70% 25%,#8064ff55,transparent 40%),
+    linear-gradient(145deg,#1C2947,#10182D 65%,#21194A);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.orbit{
+  width:220px;height:220px;border-radius:50%;
+  border:1px solid #B9A8FF65;
+  display:grid;place-items:center;
+  box-shadow:0 0 65px #8064ff40,inset 0 0 45px #8064ff20;
+  position:relative;
+}
+.orbit:before,.orbit:after{
+  content:"";position:absolute;border:1px solid #A18CFF55;
+  border-radius:50%;transform:rotate(-35deg);
+  width:290px;height:110px;
+}
+.orbit:after{transform:rotate(55deg)}
+.orbit-core{
+  width:115px;height:115px;border-radius:32px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#A18CFF,#6343E8);
+  font-size:58px;box-shadow:0 15px 50px #8064ff70;
+}
+.float-card{
+  position:absolute;background:#111C32E8;
+  border:1px solid var(--line);border-radius:14px;
+  padding:12px 15px;font-size:12px;
+  box-shadow:0 12px 35px #0005;
+}
+.float-one{top:30px;left:20px}
+.float-two{bottom:30px;right:18px}
+.section{padding:54px 0}
+.section-head{
+  display:flex;align-items:end;justify-content:space-between;
+  gap:20px;margin-bottom:25px;
+}
+.section-head h2{font-size:29px;letter-spacing:-.7px;margin:0}
+.section-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.feature,.panel{
+  background:linear-gradient(145deg,#141F35,#10192B);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;
+}
+.feature-icon{
+  width:48px;height:48px;border-radius:15px;
+  display:grid;place-items:center;
+  background:#8064FF20;color:#B8A8FF;font-size:24px;
+  margin-bottom:13px;
+}
+.feature h3{margin:0 0 7px;font-size:17px}
+.feature p{margin:0;color:var(--muted);font-size:13px}
+.category-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:13px;
+}
+.category{
+  padding:22px 15px;text-align:center;
+  border:1px solid var(--line);border-radius:17px;
+  background:var(--panel);transition:.2s;
+}
+.category:hover{border-color:#8064FF;transform:translateY(-3px)}
+.category .emoji{font-size:31px;display:block;margin-bottom:8px}
+.category strong{font-size:14px}
+.search-box{position:relative;max-width:390px;width:100%}
+.search-box input{padding-left:42px}
+.search-symbol{position:absolute;left:15px;top:10px;color:#9EAAC0}
+.product-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;
+}
+.product{
+  overflow:hidden;background:linear-gradient(145deg,#17233A,#10192B);
+  border:1px solid var(--line);border-radius:18px;
+  transition:.2s;min-width:0;
+}
+.product:hover{transform:translateY(-4px);border-color:#8064FF75}
+.product-image{
+  height:205px;background:#202C45;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-placeholder{font-size:55px}
+.product-body{padding:17px}
+.product-body h3{font-size:16px;margin:0 0 7px;overflow-wrap:anywhere}
+.product-body .description{
+  color:var(--muted);font-size:13px;
+  min-height:40px;overflow-wrap:anywhere;
+}
+.price{font-size:21px;font-weight:850;color:#B8A7FF;margin:10px 0}
+.product-tag{
+  display:inline-block;padding:4px 9px;border-radius:30px;
+  background:#8064FF20;color:#C9BDFF;font-size:11px;
+}
+.empty-state{
+  grid-column:1/-1;text-align:center;
+  border:1px dashed #56617A;border-radius:16px;
+  padding:35px;color:var(--muted);
+}
+#account,#sellerSection,#productSection,#market{
+  scroll-margin-top:95px;
+}
+.form-panel{
+  background:linear-gradient(145deg,#141F35,#10192B);
+  border:1px solid var(--line);border-radius:20px;
+  padding:25px;margin-bottom:18px;
+}
+.form-panel h2,.form-panel h3{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-size:12px;font-weight:700;
+  color:#B8C2D5;margin-bottom:5px;
 }
 input,select,textarea{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  box-sizing:border-box;
-  border:1px solid #ccc;
-  border-radius:4px;
+  width:100%;padding:13px 14px;
+  background:#0B1426;color:white;
+  border:1px solid #34415B;border-radius:11px;
+  outline:none;transition:.2s;
 }
-button{
-  background-color:#007BFF;
-  color:white;
-  padding:10px 15px;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-  margin:5px 5px 5px 0;
-}
-button:hover{background-color:#0056b3}
-button:disabled{opacity:.6;cursor:not-allowed}
-button.danger{background-color:#dc3545}
-button.danger:hover{background-color:#a71d2a}
-button.secondary{background-color:#6c757d}
-button.secondary:hover{background-color:#5a6268}
-.hidden{display:none!important}
-.small{font-size:14px;color:#666}
-.product{
-  border:1px solid #ddd;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:6px;
-  background:#fff;
-}
-.price{font-weight:bold;color:#007BFF;font-size:18px}
+input:focus,select:focus,textarea:focus{border-color:#927AFF;box-shadow:0 0 0 3px #8064FF20}
+input::placeholder,textarea::placeholder{color:#75829A}
+textarea{min-height:90px;resize:vertical}
+select option{background:#111A2D}
+.form-actions{display:flex;gap:8px;flex-wrap:wrap}
 #message{
-  font-weight:bold;
-  color:#d9534f;
-  margin-bottom:15px;
-  overflow-wrap:anywhere;
+  position:fixed;top:88px;left:50%;transform:translateX(-50%);
+  z-index:100;width:min(92%,600px);
+  padding:12px 16px;border-radius:12px;
+  background:#18243A;border:1px solid #8064FF70;
+  color:white;box-shadow:0 10px 35px #0008;
+  font-size:13px;overflow-wrap:anywhere;
+}
+#message:empty{display:none}
+.notice{
+  padding:11px 13px;border-radius:10px;
+  background:#8064FF15;color:#C9BDFF;
+  font-size:13px;margin-top:10px;overflow-wrap:anywhere;
+}
+.account-summary{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:15px;
+}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap}
+.stat{
+  background:#0B1426;border:1px solid var(--line);
+  border-radius:13px;padding:10px 15px;font-size:12px;
+}
+.stat strong{display:block;font-size:19px;color:#C0B1FF}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.trust{
+  padding:19px;border-radius:16px;
+  background:#101A2D;border:1px solid var(--line);
+}
+.trust strong{display:block;margin:7px 0}
+.trust span{color:var(--muted);font-size:13px}
+footer{
+  border-top:1px solid var(--line);
+  padding:35px 0 100px;margin-top:40px;
+  color:var(--muted);font-size:13px;
+}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.mobile-nav{display:none}
+@media(max-width:800px){
+  .nav-links{display:none;position:absolute;top:76px;left:0;right:0;
+    background:#0D1629;padding:18px 5%;border-bottom:1px solid var(--line);
+    flex-direction:column;align-items:stretch;gap:15px}
+  .nav-links.open{display:flex}
+  .nav-links a{padding:7px}
+  .menu-toggle{display:block}
+  .nav-actions .btn-outline{display:none}
+  .hero{padding-top:48px}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-visual{min-height:280px}
+  .feature-grid,.trust-grid{grid-template-columns:1fr 1fr}
+  .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .category-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .container{width:92%}
+  .brand-name{font-size:18px}
+  .brand-icon{width:38px;height:38px}
+  .hero{padding-top:35px}
+  h1{font-size:42px}
+  .hero-copy{font-size:15px}
+  .hero-visual{min-height:240px}
+  .orbit{transform:scale(.8)}
+  .feature-grid,.trust-grid{grid-template-columns:1fr}
+  .product-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .product-image{height:145px}
+  .product-body{padding:12px}
+  .product-body h3{font-size:14px}
+  .product-body .description{font-size:12px}
+  .price{font-size:17px}
+  .form-grid{grid-template-columns:1fr}
+  .form-panel{padding:17px}
+  .section{padding:38px 0}
+  .section-head{align-items:start;flex-direction:column}
+  .mobile-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;
+    z-index:60;background:#0D1629F5;
+    border-top:1px solid var(--line);
+    justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));
+    backdrop-filter:blur(16px);
+  }
+  .mobile-nav a{
+    display:flex;flex-direction:column;align-items:center;
+    gap:2px;color:#AEB8CA;font-size:10px;min-width:55px;
+  }
+  .mobile-nav b{font-size:19px;font-weight:400}
+  footer{padding-bottom:105px}
 }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-
+<div class="top-glow"></div>
 <div id="message"></div>
 
-<section id="account">
-  <h2>Hesap İşlemleri</h2>
+<header>
+  <div class="container nav">
+    <a class="brand" href="#home">
+      <span class="brand-icon">✧</span>
+      <span class="brand-name">NEXORA<span> GLOBAL</span></span>
+    </a>
 
-  <div id="authForms">
-    <input type="text" id="fullName" placeholder="Ad Soyad (Sadece kayıt için)">
-    <input type="email" id="authEmail" placeholder="E-posta adresiniz">
-    <input type="password" id="authPassword" placeholder="Şifreniz (En az 6 karakter)">
+    <nav class="nav-links" id="navLinks">
+      <a href="#home">Ana Sayfa</a>
+      <a href="#market">Pazaryeri</a>
+      <a href="#features">Avantajlar</a>
+      <a href="#sellerSection">Mağaza Aç</a>
+      <a href="#account">Hesabım</a>
+    </nav>
 
-    <div style="margin-top:10px">
-      <button type="button" id="signInButton">Giriş Yap</button>
-      <button type="button" id="signUpButton" class="secondary">Üye Ol</button>
-      <button type="button" id="forgotButton" class="secondary">Şifremi Unuttum</button>
+    <div class="nav-actions">
+      <a class="btn btn-outline" href="#account">Giriş Yap</a>
+      <a class="btn btn-primary" href="#sellerSection">Mağaza Aç ↗</a>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menüyü aç">☰</button>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> YENİ NESİL KÜRESEL PAZARYERİ</div>
+      <h1>Alışverişin yeni <span class="gradient-text">evrenine</span> hoş geldin.</h1>
+      <p class="hero-copy">
+        Keşfet, alışveriş yap, kendi mağazanı kur.
+        NEXORA ile dijital ve fiziksel ürünlerini tek bir platformda dünyaya sun.
+      </p>
+      <div class="hero-buttons">
+        <a href="#market" class="btn btn-primary">Pazaryerini Keşfet →</a>
+        <a href="#sellerSection" class="btn btn-outline">Mağazanı Oluştur</a>
+      </div>
+      <p class="small" style="margin-top:18px">✦ Herkes için dijital ticaret deneyimi</p>
+    </div>
+
+    <div class="hero-visual">
+      <div class="float-card float-one">✦ <strong>Yeni nesil ticaret</strong></div>
+      <div class="orbit"><div class="orbit-core">✧</div></div>
+      <div class="float-card float-two">🌍 <strong>Küresel fırsatlar</strong></div>
     </div>
   </div>
+</section>
 
-  <div id="loggedIn" class="hidden">
-    <p id="userEmail" style="font-weight:bold"></p>
-    <p>
-      Mağaza Durumu: <span id="storeStatus">Yok</span>
-      | Ürün Sayısı: <span id="productCount">0</span>
-    </p>
-    <button type="button" id="signOutButton" class="danger">Oturumu Kapat</button>
-  </div>
-
-  <div id="resetBox" class="hidden">
-    <h3>Yeni Şifre Belirle</h3>
-    <input type="password" id="newPassword" placeholder="Yeni Şifre (En az 6 karakter)">
-    <input type="password" id="newPasswordAgain" placeholder="Yeni Şifre (Tekrar)">
-    <button type="button" id="updatePasswordButton">Şifreyi Güncelle</button>
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>NEXORA dünyasına katıl</h2>
+        <p>Alışveriş ve satış için ihtiyacın olan temel deneyim.</p>
+      </div>
+    </div>
+    <div class="feature-grid">
+      <article class="feature">
+        <div class="feature-icon">🏪</div>
+        <h3>Herkes Satıcı Olabilir</h3>
+        <p>Kendi mağazanı oluştur, ürünlerini sergile ve satış yolculuğuna başla.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>Küresel Ticaret</h3>
+        <p>Fiziksel ve dijital ürünler için tek bir pazaryeri deneyimi.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon">✧</div>
+        <h3>Teknoloji Odaklı</h3>
+        <p>Kolay kullanılan, mobil uyumlu ve gelişmeye hazır bir platform.</p>
+      </article>
+    </div>
   </div>
 </section>
 
-<section id="sellerSection">
-  <h2>Mağazam</h2>
-
-  <div id="myStore">
-    <p class="small">Henüz giriş yapılmadı veya mağazanız bulunmuyor.</p>
-  </div>
-
-  <h3>Mağaza Aç</h3>
-
-  <form id="sellerForm">
-    <input type="text" id="storeName" placeholder="Mağaza Adı" required>
-
-    <select id="category">
-      <option value="Genel">Genel</option>
-      <option value="Teknoloji">Teknoloji</option>
-      <option value="Giyim">Giyim</option>
-      <option value="Dijital">Dijital Ürünler</option>
-    </select>
-
-    <textarea id="storeDescription" placeholder="Mağaza Açıklaması"></textarea>
-
-    <button type="submit">Mağazayı Oluştur</button>
-    <div id="sellerMessage" class="small"></div>
-  </form>
-</section>
-
-<section id="productSection">
-  <h2>Ürün Ekle</h2>
-
-  <form id="productForm">
-    <input type="text" id="productName" placeholder="Ürün Adı" required>
-    <input type="number" id="productPrice" placeholder="Fiyat (TL)" min="0.01" step="0.01" required>
-
-    <select id="productType">
-      <option value="physical">Fiziksel Ürün</option>
-      <option value="digital">Dijital Ürün</option>
-    </select>
-
-    <input type="text" id="productImage" placeholder="Ürün Görsel URL'si (İsteğe bağlı)">
-    <textarea id="productDescription" placeholder="Ürün Açıklaması"></textarea>
-
-    <button type="submit">Ürünü Pazaryerine Ekle</button>
-    <div id="productMessage" class="small"></div>
-  </form>
-
-  <h3>Mağazamdaki Ürünler</h3>
-  <div id="myProducts">
-    <p class="small">Ürünlerinizi görmek için giriş yapın.</p>
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>Kategorileri keşfet</h2>
+        <p>İlgini çeken dünyaya hızlıca geç.</p>
+      </div>
+    </div>
+    <div class="category-grid">
+      <a class="category" href="#market"><span class="emoji">📱</span><strong>Teknoloji</strong></a>
+      <a class="category" href="#market"><span class="emoji">👕</span><strong>Giyim</strong></a>
+      <a class="category" href="#market"><span class="emoji">💎</span><strong>Dijital Ürünler</strong></a>
+      <a class="category" href="#market"><span class="emoji">🏡</span><strong>Ev ve Yaşam</strong></a>
+    </div>
   </div>
 </section>
 
-<section id="market">
-  <h2>Pazaryeri Ürünleri</h2>
-  <input type="text" id="search" placeholder="Ürün veya açıklama ara...">
-  <div id="products">
-    <p class="small">Ürünler yükleniyor...</p>
+<section class="section" id="market">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">NEXORA MARKETPLACE</div>
+        <h2 style="margin-top:12px">Pazaryerini keşfet</h2>
+        <p>Mağazaların ürünlerini burada bulabilirsin.</p>
+      </div>
+      <div class="search-box">
+        <span class="search-symbol">⌕</span>
+        <input type="search" id="search" placeholder="Ürün veya açıklama ara...">
+      </div>
+    </div>
+    <div id="products" class="product-grid">
+      <div class="empty-state">Ürünler yükleniyor...</div>
+    </div>
   </div>
 </section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2>Güven, şeffaflık ve destek</h2>
+        <p>Güvenilir bir pazaryeri için sağlam temeller.</p>
+      </div>
+    </div>
+    <div class="trust-grid">
+      <div class="trust">
+        <div class="feature-icon">🔐</div>
+        <strong>Hesap güvenliği</strong>
+        <span>Hesap işlemleri Supabase kimlik doğrulaması üzerinden yürütülür.</span>
+      </div>
+      <div class="trust">
+        <div class="feature-icon">📋</div>
+        <strong>Şeffaf komisyon</strong>
+        <span>Platformun hedeflenen satış komisyonu %10'dur. İşlem koşulları ödeme altyapısıyla netleştirilecektir.</span>
+      </div>
+      <div class="trust">
+        <div class="feature-icon">💬</div>
+        <strong>Destek merkezi</strong>
+        <span>Özel destek talebi ve mesajlaşma sistemi sonraki geliştirme aşamasında kurulacaktır.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="account">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">HESAP MERKEZİ</div>
+        <h2 style="margin-top:12px">NEXORA hesabın</h2>
+        <p>Giriş yap veya ücretsiz üyeliğini oluştur.</p>
+      </div>
+    </div>
+
+    <div class="form-panel">
+      <div id="authForms">
+        <div class="form-grid">
+          <div class="field">
+            <label for="fullName">Ad Soyad</label>
+            <input type="text" id="fullName" placeholder="Adınız Soyadınız">
+          </div>
+          <div class="field">
+            <label for="authEmail">E-posta</label>
+            <input type="email" id="authEmail" placeholder="E-posta adresiniz">
+          </div>
+        </div>
+        <div class="field">
+          <label for="authPassword">Şifre</label>
+          <input type="password" id="authPassword" placeholder="En az 6 karakter">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="signInButton" class="btn btn-primary">Giriş Yap</button>
+          <button type="button" id="signUpButton" class="btn btn-secondary">Üye Ol</button>
+          <button type="button" id="forgotButton" class="btn btn-outline">Şifremi Unuttum</button>
+        </div>
+      </div>
+
+      <div id="loggedIn" class="hidden">
+        <div class="account-summary">
+          <div>
+            <div class="eyebrow">HESABIN AKTİF</div>
+            <h3 id="userEmail"></h3>
+          </div>
+          <div class="stat-row">
+            <div class="stat">Mağaza<strong id="storeStatus">Yok</strong></div>
+            <div class="stat">Ürün sayısı<strong id="productCount">0</strong></div>
+          </div>
+        </div>
+        <button type="button" id="signOutButton" class="btn btn-danger" style="margin-top:15px">Güvenli Çıkış</button>
+      </div>
+
+      <div id="resetBox" class="hidden">
+        <h3>Yeni şifre belirle</h3>
+        <div class="field"><input type="password" id="newPassword" placeholder="Yeni şifre (en az 6 karakter)"></div>
+        <div class="field"><input type="password" id="newPasswordAgain" placeholder="Yeni şifre tekrar"></div>
+        <button type="button" id="updatePasswordButton" class="btn btn-primary">Şifreyi Güncelle</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sellerSection">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">SATICI MERKEZİ</div>
+        <h2 style="margin-top:12px">Kendi mağazanı oluştur</h2>
+        <p>NEXORA'da satış yolculuğuna ilk adımını at.</p>
+      </div>
+    </div>
+
+    <div class="form-panel">
+      <h3>Mağaza bilgilerim</h3>
+      <div id="myStore" class="notice">Henüz giriş yapılmadı veya mağazanız bulunmuyor.</div>
+      <h3 style="margin-top:25px">Yeni mağaza aç</h3>
+      <form id="sellerForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="storeName">Mağaza adı</label>
+            <input type="text" id="storeName" placeholder="Mağaza adınız" required>
+          </div>
+          <div class="field">
+            <label for="category">Kategori</label>
+            <select id="category">
+              <option value="Genel">Genel</option>
+              <option value="Teknoloji">Teknoloji</option>
+              <option value="Giyim">Giyim</option>
+              <option value="Dijital">Dijital Ürünler</option>
+              <option value="Ev ve Yaşam">Ev ve Yaşam</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="storeDescription">Mağaza açıklaması</label>
+          <textarea id="storeDescription" placeholder="Mağazanı tanıt..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">✦ Mağazamı Oluştur</button>
+        <div id="sellerMessage" class="notice"></div>
+    </form>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="productSection">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">ÜRÜN YÖNETİMİ</div>
+        <h2 style="margin-top:12px">Ürünlerini sergile</h2>
+        <p>Mağazana yeni ürünler ekle ve yönet.</p>
+      </div>
+    </div>
+    <div class="form-panel">
+      <h3>Yeni ürün ekle</h3>
+      <form id="productForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="productName">Ürün adı</label>
+            <input type="text" id="productName" placeholder="Ürün adı" required>
+            </div>
+          <div class="field">
+            <label for="productPrice">Fiyat (TL)</label>
+            <input type="number" id="productPrice" placeholder="0,00" min="0.01" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="productType">Ürün türü</label>
+            <select id="productType">
+              <option value="physical">Fiziksel Ürün</option>
+              <option value="digital">Dijital Ürün</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="productImage">Ürün görsel bağlantısı</label>
+            <input type="url" id="productImage" placeholder="https://...">
+          </div>
+        </div>
+        <div class="field">
+          <label for="productDescription">Ürün açıklaması</label>
+          <textarea
+            id="productDescription" placeholder="Ürünün özelliklerini anlat..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">＋ Ürünü Pazaryerine Ekle</button>
+        <div id="productMessage" class="notice"></div>
+      </form>
+    </div>
+    <div class="form-panel">
+      <h3>Mağazamın ürünleri</h3>
+      <div id="myProducts" class="product-grid">
+        <div class="empty-state">Ürünlerinizi görmek için giriş yapın.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container footer-row">
+    <div>
+      <div class="brand"><span class="brand-icon">✧</span><span class="brand-name">NEXORA<span> GLOBAL</span></span></div>
+      <p>Küresel ticaretin yeni adresi.</p>
+    </div>
+    <div>
+      <strong style="color:white">NEXORA AI GLOBAL</strong>
+      <p>© 2026 NEXORA. Tüm hakları saklıdır.</p>
+      <p class="small">Güvenli ödeme ve destek modülleri geliştirme aşamasındadır.</p>
+    </div>
+  </div>
+</footer>
+<nav class="mobile-nav">
+  <a href="#home"><b>⌂</b>Ana Sayfa</a>
+  <a href="#market"><b>⌕</b>Pazaryeri</a>
+  <a href="#sellerSection"><b>＋</b>Mağaza Aç</a>
+  <a href="#account"><b>◉</b>Hesabım</a>
+</nav>
 
 <script>
-"use strict";
+  "use strict";
 
 /* SUPABASE AYARLARI */
 const SUPABASE_URL = "https://udlqaozwbvnecbcrlvxq.supabase.co";
@@ -179,9 +665,7 @@ let myProductList = [];
 let recoveryMode = false;
 let loadingAuth = false;
 
-function $(id){
-  return document.getElementById(id);
-}
+function $(id){return document.getElementById(id)}
 
 function message(text){
   if($("message")) $("message").textContent = text;
@@ -192,638 +676,418 @@ function go(id){
 }
 
 function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[c]));
-}
-
-function showNotice(id,text){
+  }
+  function showNotice(id,text){
   if($(id)) $(id).textContent = text;
 }
 
-/* HATALARI GÖSTER */
-window.onerror = function(msg,source,line){
-  message("Sistem hatası: " + msg + " | Satır: " + line);
+window.onerror=function(msg,source,line){
+  message("Sistem hatası: "+msg+" | Satır: "+line);
 };
 
-window.addEventListener("unhandledrejection",event => {
-  message("İşlem hatası: " +
-    (event.reason?.message || String(event.reason)));
+window.addEventListener("unhandledrejection",event=>{
+  message("İşlem hatası: "+(event.reason?.message||String(event.reason)));
 });
 
-/* SUPABASE BAĞLANTISI */
 function initializeSupabase(){
   if(!window.supabase?.createClient){
-    message("Supabase kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");
+    message("Supabase yüklenemedi. İnternet bağlantınızı kontrol edin.");
     return false;
   }
-
   try{
-    db = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY,
-      {
-        auth:{
-          detectSessionInUrl:true,
-          persistSession:true,
-          autoRefreshToken:true
-        }
+   db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+      auth:{
+        detectSessionInUrl:true,
+        persistSession:true,
+        autoRefreshToken:true
       }
-    );
-
+    });
     return true;
   }catch(error){
-    message("Supabase başlatılamadı: " + error.message);
+    message("Supabase başlatılamadı: "+error.message);
     return false;
   }
-}
-
-function setAuthLoading(value){
-  loadingAuth = value;
-
-  ["signInButton","signUpButton","forgotButton"].forEach(id => {
-    if($(id)) $(id).disabled = value;
-  });
 }
 
 function checkDatabase(){
   if(!db){
-    message("Supabase bağlantısı hazır değil. Sayfayı yenileyip tekrar deneyin.");
+    message("Supabase bağlantısı hazır değil. Sayfayı yenileyin.");
     return false;
   }
   return true;
+  }
+  function setAuthLoading(value){
+  loadingAuth=value;
+  ["signInButton","signUpButton","forgotButton","updatePasswordButton"].forEach(id=>{
+    if($(id)) $(id).disabled=value;
+  });
 }
 
-/* HESAP EKRANI */
 function updateAccount(){
-  const logged = !!currentUser && !recoveryMode;
-
-  if($("authForms")){
-    $("authForms").classList.toggle("hidden",logged || recoveryMode);
-  }
-
-  if($("loggedIn")){
-    $("loggedIn").classList.toggle("hidden",!logged);
-  }
-
-  if($("resetBox")){
-    $("resetBox").classList.toggle("hidden",!recoveryMode);
-  }
-
-  if($("userEmail")){
-    $("userEmail").textContent =
-      logged ? "Giriş yapan: " + currentUser.email : "";
-  }
+  const logged=!!currentUser&&!recoveryMode;
+  $("authForms").classList.toggle("hidden",logged||recoveryMode);
+  $("loggedIn").classList.toggle("hidden",!logged);
+  $("resetBox").classList.toggle("hidden",!recoveryMode);
+  $("userEmail").textContent=logged?"Giriş yapan: "+currentUser.email:"";
 }
 
 function showResetBox(){
-  recoveryMode = true;
+  recoveryMode=true;
   updateAccount();
   message("Yeni şifrenizi belirleyebilirsiniz.");
   go("account");
 }
-
-/* ÜYE OL */
-async function signUp(){
-  if(loadingAuth) return;
-  if(!checkDatabase()) return;
-
-  const name = $("fullName")?.value.trim() || "";
-  const email = $("authEmail")?.value.trim() || "";
-  const password = $("authPassword")?.value || "";
-
-  if(!email || password.length < 6){
-    message("Geçerli bir e-posta ve en az 6 karakterli şifre girin.");
+  async function signUp(){
+  if(loadingAuth||!checkDatabase()) return;
+  const name=$("fullName").value.trim();
+  const email=$("authEmail").value.trim();
+  const password=$("authPassword").value;
+  if(!email||password.length<6){
+    message("Geçerli e-posta ve en az 6 karakterli şifre girin.");
     return;
   }
-
   try{
     setAuthLoading(true);
     message("Üyeliğiniz oluşturuluyor...");
-
-    const {data,error} = await db.auth.signUp({
-      email,
-      password,
-      options:{
-        data:{full_name:name},
-        emailRedirectTo:SITE_URL
-      }
+    const {data,error}=await db.auth.signUp({
+      email,password,
+      options:{data:{full_name:name},emailRedirectTo:SITE_URL}
     });
-
     if(error) throw error;
-
     if(data.session){
-      currentUser = data.user;
-      recoveryMode = false;
+      currentUser=data.user;
+      recoveryMode=false;
       updateAccount();
       message("Üyeliğiniz tamamlandı. Hoş geldiniz!");
       await loadUser();
     }else{
-      message("Kayıt başarılı. E-postanıza gelen bağlantıya tıklayın, ardından giriş yapın.");
+      message("Kayıt başarılı. E-postanıza gelen bağlantıyı onaylayın.");
     }
   }catch(error){
-    console.error(error);
-    message("Kayıt hatası: " + error.message);
-  }finally{
-    setAuthLoading(false);
-  }
-}
-
-/* GİRİŞ YAP */
-async function signIn(){
-  if(loadingAuth) return;
-  if(!checkDatabase()) return;
-
-  const email = $("authEmail")?.value.trim() || "";
-  const password = $("authPassword")?.value || "";
-
-  if(!email || !password){
-    message("E-posta ve şifrenizi girin.");
-    return;
-  }
-
+    message("Kayıt hatası: "+error.message);
+  }finally{setAuthLoading(false)}
+    }
+  async function signIn(){
+  if(loadingAuth||!checkDatabase()) return;
+  const email=$("authEmail").value.trim();
+  const password=$("authPassword").value;
+  if(!email||!password){message("E-posta ve şifrenizi girin.");return}
   try{
     setAuthLoading(true);
     message("Giriş yapılıyor...");
-
-    const {data,error} = await db.auth.signInWithPassword({
-      email,
-      password
-    });
-
+    const {data,error}=await db.auth.signInWithPassword({email,password});
     if(error) throw error;
-
-    currentUser = data.user;
-    recoveryMode = false;
+    currentUser=data.user;
+    recoveryMode=false;
     updateAccount();
-
     message("Giriş başarılı! Hoş geldiniz.");
     await loadUser();
   }catch(error){
-    console.error(error);
-    message("Giriş hatası: " + error.message);
-  }finally{
-    setAuthLoading(false);
+    message("Giriş hatası: "+error.message);
+  }finally{setAuthLoading(false)}
   }
-}
-
-/* ŞİFREMİ UNUTTUM */
-async function forgotPassword(){
-  if(loadingAuth) return;
-  if(!checkDatabase()) return;
-
-  const emailEl = $("authEmail");
-  const email = emailEl?.value.trim() || "";
-
-  if(!email){
-    message("Önce e-posta adresinizi yazın.");
-    emailEl?.focus();
-    return;
-  }
-
+  async function forgotPassword(){
+  if(loadingAuth||!checkDatabase()) return;
+  const email=$("authEmail").value.trim();
+  if(!email){message("Önce e-posta adresinizi yazın.");$("authEmail").focus();return}
   try{
     setAuthLoading(true);
     message("Şifre yenileme bağlantısı gönderiliyor...");
-
-    const {error} = await db.auth.resetPasswordForEmail(email,{
-      redirectTo:SITE_URL
-    });
-
+    const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:SITE_URL});
     if(error) throw error;
-
-    message("Şifre yenileme bağlantısı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");
+    message("Bağlantı gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.");
   }catch(error){
-    message("Şifre yenileme hatası: " + error.message);
-  }finally{
-    setAuthLoading(false);
-  }
-}
-
-/* YENİ ŞİFRE */
-async function updatePassword(){
-  if(loadingAuth) return;
-  if(!checkDatabase()) return;
-
-  const password = $("newPassword")?.value || "";
-  const again = $("newPasswordAgain")?.value || "";
-
-  if(password.length < 6){
-    message("Yeni şifreniz en az 6 karakter olmalıdır.");
-    return;
-  }
-
-  if(password !== again){
-    message("Girdiğiniz şifreler eşleşmiyor.");
-    return;
-  }
-
+    message("Şifre yenileme hatası: "+error.message);
+  }finally{setAuthLoading(false)}
+   async function updatePassword(){
+  if(loadingAuth||!checkDatabase()) return;
+  const password=$("newPassword").value;
+  const again=$("newPasswordAgain").value;
+  if(password.length<6){message("Şifre en az 6 karakter olmalıdır.");return}
+  if(password!==again){message("Şifreler eşleşmiyor.");return}
   try{
     setAuthLoading(true);
-    message("Yeni şifreniz kaydediliyor...");
-
-    const {error} = await db.auth.updateUser({password});
-
+    const {error}=await db.auth.updateUser({password});
     if(error) throw error;
-
     await db.auth.signOut();
-
-    currentUser = null;
-    myStore = null;
-    recoveryMode = false;
-
-    $("newPassword").value = "";
-    $("newPasswordAgain").value = "";
-
+    currentUser=null;myStore=null;myProductList=[];
+    recoveryMode=false;
+    $("newPassword").value="";
+    $("newPasswordAgain").value="";
     updateAccount();
     await updateDashboard();
-
-    message("Şifreniz değiştirildi. Yeni şifrenizle giriş yapabilirsiniz.");
+    message("Şifreniz değiştirildi. Yeni şifrenizle giriş yapın.");
   }catch(error){
-    message("Şifre güncellenemedi: " + error.message);
-  }finally{
-    setAuthLoading(false);
-  }
-}
-
-/* OTURUM KAPAT */
-async function signOutUser(){
+    message("Şifre güncellenemedi: "+error.message);
+  }finally{setAuthLoading(false)}
+     async function signOutUser(){
   if(!checkDatabase()) return;
-
   try{
-    const {error} = await db.auth.signOut();
+    const {error}=await db.auth.signOut();
     if(error) throw error;
-
-    currentUser = null;
-    myStore = null;
-    myProductList = [];
-    recoveryMode = false;
-
+    currentUser=null;myStore=null;myProductList=[];
+    recoveryMode=false;
     updateAccount();
     await updateDashboard();
-
     message("Oturum kapatıldı.");
   }catch(error){
-    message("Çıkış hatası: " + error.message);
+    message("Çıkış hatası: "+error.message);
   }
 }
 
-/* KULLANICIYI YÜKLE */
 async function loadUser(){
-  if(!db || recoveryMode) return;
-
-  const {data,error} = await db.auth.getUser();
-
-  if(error){
-    console.error("Kullanıcı alma hatası:",error);
-  }
-
-  currentUser = data?.user || null;
-
+  if(!db||recoveryMode) return;
+  const {data,error}=await db.auth.getUser();
+  if(error) console.error(error);
+  currentUser=data?.user||null;
   updateAccount();
-
-  if(currentUser){
-    await loadMyStore();
-  }else{
-    myStore = null;
-  }
-
+  if(currentUser) await loadMyStore();
+  else myStore=null;
   await loadProducts();
-  await updateDashboard();
+  await updateDashboard()
 }
-
-/* MAĞAZAYI YÜKLE */
-async function loadMyStore(){
-  if(!currentUser){
-    myStore = null;
-    return;
-  }
-
-  const {data,error} = await db
-    .from("stores")
+  async function loadMyStore(){
+  if(!currentUser){myStore=null;return}
+  const {data,error}=await db.from("stores")
     .select("*")
     .eq("owner_id",currentUser.id)
     .limit(1)
     .maybeSingle();
-
   if(error){
     console.error("Mağaza yükleme hatası:",error);
-    showNotice("sellerMessage","Mağaza bilgisi alınamadı: " + error.message);
+    showNotice("sellerMessage","Mağaza bilgisi alınamadı: "+error.message);
     return;
   }
-
-  myStore = data;
-}
-
-/* MAĞAZA OLUŞTUR */
-$("sellerForm").addEventListener("submit",async function(e){
+  myStore=data;
+  }
+  $
+    ("sellerForm").addEventListener("submit",async function(e){
   e.preventDefault();
-
   if(!currentUser){
     showNotice("sellerMessage","Önce giriş yapmalısınız.");
-    go("account");
-    return;
+    go("account");return;
   }
-
   if(myStore){
-    showNotice("sellerMessage","Zaten bir mağazanız var.");
-    return;
+    showNotice("sellerMessage","Zaten bir mağazanız var.");return;
   }
-
-  const name = $("storeName").value.trim();
-
-  if(!name){
-    showNotice("sellerMessage","Mağaza adı zorunludur.");
-    return;
-  }
-
-  const store = {
+  const name=$("storeName").value.trim();
+  if(!name){showNotice("sellerMessage","Mağaza adı zorunludur.");return}
+    const store={
     owner_id:currentUser.id,
     name,
     category:$("category").value,
-    description:$("storeDescription").value.trim() || null,
+    description:$("storeDescription").value.trim()||null,
     email:currentUser.email,
     status:"active",
     is_active:true
   };
 
   try{
-    const {data,error} = await db
-      .from("stores")
-      .insert(store)
-      .select()
-      .single();
-
+    const {data,error}=await db.from("stores").insert(store).select().single();
     if(error) throw error;
-
-    myStore = data;
-
-    showNotice("sellerMessage","Mağazanız başarıyla oluşturuldu!");
+    myStore=data;
+   showNotice("sellerMessage","Mağazanız başarıyla oluşturuldu!");
     this.reset();
-
     await updateDashboard();
   }catch(error){
-    showNotice("sellerMessage","Mağaza oluşturulamadı: " + error.message);
+    showNotice("sellerMessage","Mağaza oluşturulamadı: "+error.message);
   }
 });
 
-/* ÜRÜN EKLE */
 $("productForm").addEventListener("submit",async function(e){
   e.preventDefault();
-
   if(!currentUser){
     showNotice("productMessage","Ürün eklemek için giriş yapmalısınız.");
-    go("account");
-    return;
+    go("account");return;
   }
-
   if(!myStore){
     showNotice("productMessage","Önce mağazanızı oluşturun.");
-    go("sellerSection");
-    return;
+    go("sellerSection");return;
   }
 
-  const price = Number($("productPrice").value);
-
-  if(!Number.isFinite(price) || price <= 0){
-    showNotice("productMessage","Geçerli bir fiyat girin.");
-    return;
+  const price=Number($("productPrice").value);
+  if(!Number.isFinite(price)||price<=0){
+    showNotice("productMessage","Geçerli bir fiyat girin.");return;
   }
 
-  const product = {
+  const product={
     store_id:myStore.id,
     name:$("productName").value.trim(),
-    description:$("productDescription").value.trim() || null,
+    description:$("productDescription").value.trim()||null,
     price,
     product_type:$("productType").value,
-    image_url:$("productImage").value.trim() || null,
+    image_url:$("productImage").value.trim()||null,
     status:"active",
     is_active:true
   };
 
   try{
-    const {error} = await db.from("products").insert(product);
-
+    const {error}=await db.from("products").insert(product);
     if(error) throw error;
-
     showNotice("productMessage","Ürününüz pazaryerine eklendi!");
-
     this.reset();
-
     await loadProducts();
     await updateDashboard();
     go("market");
   }catch(error){
-    showNotice("productMessage","Ürün eklenemedi: " + error.message);
+    showNotice("productMessage","Ürün eklenemedi: "+error.message);
   }
 });
 
-/* PAZARYERİ ÜRÜNLERİ */
 async function loadProducts(){
-  const area = $("products");
-
-  if(!area || !db) return;
-
-  area.innerHTML = '<p class="small">Ürünler yükleniyor...</p>';
-
+  const area=$("products");
+  if(!area||!db) return;
+  area.innerHTML='<div class="empty-state">Ürünler yükleniyor...</div>';
   try{
-    const {data,error} = await db
-      .from("products")
+    const {data,error}=await db.from("products")
       .select("*")
       .eq("is_active",true)
       .eq("status","active")
       .order("created_at",{ascending:false});
-
     if(error) throw error;
-
-    allProducts = data || [];
+    allProducts=data||[];
     renderProducts();
   }catch(error){
-    area.innerHTML =
-      '<p class="small">Ürünler yüklenemedi: ' +
-      escapeHTML(error.message) + '</p>';
+    area.innerHTML='<div class="empty-state">Ürünler yüklenemedi: '+escapeHTML(error.message)+'</div>';
   }
-}
-
-function renderProducts(){
-  const area = $("products");
+  }
+  function productCard(p){
+  const image=p.image_url
+    ? '<img src="'+escapeHTML(p.image_url)+'" alt="'+escapeHTML(p.name)+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=product-placeholder>📦</div>\'">'
+    : '<div class="product-placeholder">📦</div>';
+  return `
+    <article class="product">
+      <div class="product-image">${image}</div>
+      <div class="product-body">
+        <span class="product-tag">${p.product_type==="digital"?"Dijital ürün":"Fiziksel ürün"}</span>
+        <h3>${escapeHTML(p.name)}</h3>
+        <p class="description">${escapeHTML(p.description||"Ürün açıklaması bulunmuyor.")}</p>
+        <div class="price">${Number(p.price||0).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})} TL</div>
+      </div>
+    </article>`;
+  }
+  function renderProducts(){
+  const area=$("products");
   if(!area) return;
-
-  const q = $("search").value.toLocaleLowerCase("tr");
-
-  const items = allProducts.filter(p =>
-    String(p.name || "").toLocaleLowerCase("tr").includes(q) ||
-    String(p.description || "").toLocaleLowerCase("tr").includes(q)
+  const q=$("search").value.toLocaleLowerCase("tr");
+  const items=allProducts.filter(p=>
+    String(p.name||"").toLocaleLowerCase("tr").includes(q)||
+    String(p.description||"").toLocaleLowerCase("tr").includes(q)
   );
-
   if(!items.length){
-    area.innerHTML = '<p class="small">Aramanıza uygun ürün bulunamadı.</p>';
+    area.innerHTML='<div class="empty-state">Henüz ürün bulunamadı. Aramanı değiştirebilir veya daha sonra tekrar bakabilirsin.</div>';
     return;
   }
-
-  area.innerHTML = items.map(p => `
-    <article class="product">
-      ${
-        p.image_url
-        ? `<img src="${escapeHTML(p.image_url)}"
-             alt="Ürün görseli"
-             style="max-width:100px;display:block"
-             onerror="this.style.display='none'">`
-        : '<div style="font-size:38px;text-align:center;padding:10px">📦</div>'
-      }
-      <h3>${escapeHTML(p.name)}</h3>
-      <p class="small">${escapeHTML(p.description || "")}</p>
-      <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>
-      <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>
-    </article>
-  `).join("");
+  area.innerHTML=items.map(productCard).join("");
 }
 
 $("search").addEventListener("input",renderProducts);
-
-/* KONTROL PANELİ */
 async function updateDashboard(){
   if(!currentUser){
-    $("productCount").textContent = "0";
-    $("storeStatus").textContent = "Yok";
-    $("myStore").textContent = "Henüz giriş yapılmadı.";
-    $("myProducts").innerHTML =
-      '<p class="small">Ürünlerinizi görmek için giriş yapın.</p>';
+    $("productCount").textContent="0";
+    $("storeStatus").textContent="Yok";
+    $("myStore").textContent="Henüz giriş yapılmadı.";
+    $("myProducts").innerHTML='<div class="empty-state">Ürünlerinizi görmek için giriş yapın.</div>';
     return;
   }
 
   if(myStore){
-    $("storeStatus").textContent = "Aktif";
-
-    $("myStore").innerHTML = `
-      <p><strong>Mağaza Adı:</strong> ${escapeHTML(myStore.name)}</p>
-      <p><strong>Kategori:</strong> ${escapeHTML(myStore.category || "Genel")}</p>
-      <p class="small">${escapeHTML(myStore.description || "Açıklama girilmedi.")}</p>
+    $("storeStatus").textContent="Aktif";
+    $("myStore").innerHTML=`
+      <p><strong>Mağaza adı:</strong> ${escapeHTML(myStore.name)}</p>
+      <p><strong>Kategori:</strong> ${escapeHTML(myStore.category||"Genel")}</p>
+      <p class="small">${escapeHTML(myStore.description||"Açıklama girilmedi.")}</p>
     `;
-
     try{
-      const {data,error} = await db
-        .from("products")
+      const {data,error}=await db.from("products")
         .select("*")
         .eq("store_id",myStore.id)
         .order("created_at",{ascending:false});
-
       if(error) throw error;
-
-      myProductList = data || [];
-      $("productCount").textContent = String(myProductList.length);
-
+      myProductList=data||[];
+      $("productCount").textContent=String(myProductList.length);
       renderMyProducts();
     }catch(err){
-      $("myProducts").innerHTML =
-        '<p class="small">Ürünleriniz yüklenirken hata oluştu: ' +
-        escapeHTML(err.message) + '</p>';
-    }
-  }else{
-    $("storeStatus").textContent = "Yok";
-    $("productCount").textContent = "0";
-
-    $("myStore").innerHTML =
-      '<p class="small">Henüz mağaza açmadınız. Mağaza Aç bölümünden hemen oluşturabilirsiniz.</p>';
-
-    $("myProducts").innerHTML =
-      '<p class="small">Mağazanız olmadığı için ürün bulunmuyor.</p>';
+      $("myProducts").innerHTML='<div class="empty-state">Ürünler yüklenemedi: '+escapeHTML(err.message)+'</div>';
+  }
+    }else{
+    $("storeStatus").textContent="Yok";
+    $("productCount").textContent="0";
+    $("myStore").textContent="Henüz mağaza açmadınız. Yukarıdaki formdan oluşturabilirsiniz.";
+    $("myProducts").innerHTML='<div class="empty-state">Mağazanız olmadığı için ürün bulunmuyor.</div>';
   }
 }
 
-/* MAĞAZA ÜRÜNLERİ */
 function renderMyProducts(){
-  const area = $("myProducts");
-  if(!area) return;
-
+  const area=$("myProducts");
   if(!myProductList.length){
-    area.innerHTML =
-      '<p class="small">Henüz yayınlanmış bir ürününüz bulunmuyor.</p>';
+    area.innerHTML='<div class="empty-state">Henüz ürününüz bulunmuyor.</div>';
     return;
   }
-
-  area.innerHTML = myProductList.map(p => `
+  area.innerHTML=myProductList.map(p=>`
     <article class="product">
-      <h3>${escapeHTML(p.name)}</h3>
-      <div class="price">${Number(p.price || 0).toLocaleString("tr-TR")} TL</div>
-      <p class="small">${p.product_type === "digital" ? "Dijital ürün" : "Fiziksel ürün"}</p>
-      <button type="button" class="danger" data-delete-id="${escapeHTML(p.id)}">Ürünü Sil</button>
+      <div class="product-image">
+        ${p.image_url
+          ?'<img src="'+escapeHTML(p.image_url)+'" alt="'+escapeHTML(p.name)+'" loading="lazy">'
+          :'<div class="product-placeholder">📦</div>'}
+      </div>
+      <div class="product-body">
+        <h3>${escapeHTML(p.name)}</h3>
+        <div class="price">${Number(p.price||0).toLocaleString("tr-TR")} TL</div>
+        <p class="small">${p.product_type==="digital"?"Dijital ürün":"Fiziksel ürün"}</p>
+        <button type="button" class="btn btn-danger" data-delete-id="${escapeHTML(p.id)}">Ürünü Sil</button>
+      </div>
     </article>
   `).join("");
-
-  area.querySelectorAll("[data-delete-id]").forEach(button => {
-    button.addEventListener("click",() => {
-      deleteProduct(button.dataset.deleteId);
-    });
+  area.querySelectorAll("[data-delete-id]").forEach(button=>{
+    button.addEventListener("click",()=>deleteProduct(button.dataset.deleteId));
   });
 }
 
-/* ÜRÜN SİL */
 async function deleteProduct(id){
   if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
-
   try{
-    const {error} = await db
-      .from("products")
-      .delete()
-      .eq("id",id);
-
+    const {error}=await db.from("products").delete().eq("id",id);
     if(error) throw error;
-
     await loadProducts();
     await updateDashboard();
-
     message("Ürün silindi.");
   }catch(error){
-    message("Ürün silinemedi: " + error.message);
+    message("Ürün silinemedi: "+error.message);
   }
 }
 
-/* UYGULAMAYI BAŞLAT */
 function startApp(){
-
-  /* Buton bağlantıları */
   $("signUpButton").addEventListener("click",signUp);
   $("signInButton").addEventListener("click",signIn);
   $("forgotButton").addEventListener("click",forgotPassword);
   $("signOutButton").addEventListener("click",signOutUser);
   $("updatePasswordButton").addEventListener("click",updatePassword);
 
-  /* Supabase bağlantısı */
-  if(!initializeSupabase()){
-    return;
-  }
-
+  $("menuToggle").addEventListener("click",()=>{
+    $("navLinks").classList.toggle("open");
+  });
+  $("navLinks").querySelectorAll("a").forEach(link=>{
+    link.addEventListener("click",()=>$("navLinks").classList.remove("open"));
+  });
+   if(!initializeSupabase()) return;
   message("NEXORA bağlantısı hazırlanıyor...");
 
-  db.auth.onAuthStateChange((event,session) => {
-
-    if(event === "PASSWORD_RECOVERY"){
-      showResetBox();
-      return;
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==="PASSWORD_RECOVERY"){
+      showResetBox();return;
     }
-
-    currentUser = session?.user || null;
-
-    /*
-      Oturum değişikliği callback'i içinde doğrudan
-      Supabase sorgusu çalıştırmamak için ayrı görevde çağırıyoruz.
-    */
-    setTimeout(() => {
-      loadUser().catch(error => {
-        message("Başlangıç hatası: " + error.message);
-      });
+    currentUser=session?.user||null;
+    setTimeout(()=>{
+      loadUser().catch(error=>message("Başlangıç hatası: "+error.message));
     },0);
   });
-
 }
 
 startApp();
 </script>
-
 </body>
-                                     </html>
-    
+</html>
