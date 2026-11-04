@@ -1240,11 +1240,15 @@ function startApp(){
     },0);
   });
 }
-
-startApp();
   window.addEventListener("error",function(e){
   alert("NEXORA HATASI: "+e.message+" | Satır: "+e.lineno);
 });
+
+window.addEventListener("unhandledrejection",function(e){
+  alert("NEXORA İŞLEM HATASI: "+e.reason);
+});
+
+startApp();
 </script>
 </body>
 </html>
