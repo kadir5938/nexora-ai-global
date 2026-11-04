@@ -652,7 +652,7 @@ footer{
 <script>
   "use strict";
 
-/* SUPABASE AYARLARI */
+/*  AYARLARI */
 const SUPABASE_URL = "https://udlqaozwbvnecbcrlvxq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_TBNKOEkqddjxV2yNvKZm7A_N1KdpQ-S";
 const SITE_URL = "https://kadir5938.github.io/nexora-ai-global/";
@@ -822,8 +822,10 @@ function showResetBox(){
     message("Şifreniz değiştirildi. Yeni şifrenizle giriş yapın.");
   }catch(error){
     message("Şifre güncellenemedi: "+error.message);
-  }finally{setAuthLoading(false)}
-     async function signOutUser(){
+    }finally{setAuthLoading(false)}
+}
+
+async function signOutUser(){
   if(!checkDatabase()) return;
   try{
     const {error}=await db.auth.signOut();
