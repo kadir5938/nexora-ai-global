@@ -1428,7 +1428,13 @@ startApp();
 </div>
   <script>
     
-window.closeNexoraIntro = function(){
+
+<script>
+let nexoraIntroTimer = null;
+let nexoraShortTimer = null;
+let nexoraTransitionStarted = false;
+
+function finishNexoraIntro(){
   const intro = document.getElementById("nexoraIntro");
   if (!intro) return;
 
@@ -1437,7 +1443,26 @@ window.closeNexoraIntro = function(){
   try {
     localStorage.setItem("nexoraVisited", "yes");
   } catch(e) {}
+}
+
+window.closeNexoraIntro = function(){
+  showNexoraShortIntro();
 };
+
+function showNexoraShortIntro(){
+  const intro = document.getElementById("nexoraIntro");
+  if (!intro || nexoraTransitionStarted) return;
+
+  nexoraTransitionStarted = true;
+  clearTimeout(nexoraIntroTimer);
+
+  intro.classList.add("short-intro");
+
+  nexoraShortTimer = setTimeout(
+    finishNexoraIntro,
+    1800
+  );
+}
 
 (function(){
   const intro = document.getElementById("nexoraIntro");
@@ -1462,12 +1487,15 @@ window.closeNexoraIntro = function(){
   } catch(e) {}
 
   intro.classList.remove("hide");
+  intro.classList.remove("short-intro");
 
   if (visited) {
-    intro.classList.add("short-intro");
-    setTimeout(window.closeNexoraIntro, 1800);
+    showNexoraShortIntro();
   } else {
-    intro.classList.remove("short-intro");
+    nexoraIntroTimer = setTimeout(
+      showNexoraShortIntro,
+      7000
+    );
   }
 })();
 </script>
