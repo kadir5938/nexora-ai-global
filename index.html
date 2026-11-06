@@ -251,6 +251,63 @@ select option{background:#111A2D}
   color:white;box-shadow:0 10px 35px #0008;
   font-size:13px;overflow-wrap:anywhere;
 }
+  .product-image{
+  height:205px;background:#202C45;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.product-image img{width:100%;height:100%;object-fit:cover}
+.product-placeholder{font-size:55px}
+.product-body{padding:17px}
+.product-body h3{font-size:16px;margin:0 0 7px;overflow-wrap:anywhere}
+.product-body .description{
+  color:var(--muted);font-size:13px;
+  min-height:40px;overflow-wrap:anywhere;
+}
+.price{font-size:21px;font-weight:850;color:#B8A7FF;margin:10px 0}
+.product-tag{
+  display:inline-block;padding:4px 9px;border-radius:30px;
+  background:#8064FF20;color:#C9BDFF;font-size:11px;
+}
+.empty-state{
+  grid-column:1/-1;text-align:center;
+  border:1px dashed #56617A;border-radius:16px;
+  padding:35px;color:var(--muted);
+}
+#account,#sellerSection,#productSection,#market{
+  scroll-margin-top:95px;
+}
+.form-panel{
+  background:linear-gradient(145deg,#141F35,#10192B);
+  border:1px solid var(--line);border-radius:20px;
+  padding:25px;margin-bottom:18px;
+}
+.form-panel h2,.form-panel h3{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{margin-bottom:13px}
+.field label{
+  display:block;font-size:12px;font-weight:700;
+  color:#B8C2D5;margin-bottom:5px;
+}
+input,select,textarea{
+  width:100%;padding:13px 14px;
+  background:#0B1426;color:white;
+  border:1px solid #34415B;border-radius:11px;
+  outline:none;transition:.2s;
+}
+input:focus,select:focus,textarea:focus{border-color:#927AFF;box-shadow:0 0 0 3px #8064FF20}
+input::placeholder,textarea::placeholder{color:#75829A}
+textarea{min-height:90px;resize:vertical}
+select option{background:#111A2D}
+.form-actions{display:flex;gap:8px;flex-wrap:wrap}
+#message{
+  position:fixed;top:88px;left:50%;transform:translateX(-50%);
+  z-index:100;width:min(92%,600px);
+  padding:12px 16px;border-radius:12px;
+  background:#18243A;border:1px solid #8064FF70;
+  color:white;box-shadow:0 10px 35px #0008;
+  font-size:13px;overflow-wrap:anywhere;
+}
 #message:empty{display:none}
 .notice{
   padding:11px 13px;border-radius:10px;
@@ -1251,5 +1308,40 @@ window.addEventListener("unhandledrejection",function(e){
 
 startApp();
 </script>
+<div id="nexoraIntro">
+  <div class="nexora-logo">NEXORA</div>
+  <div class="nexora-line"></div>
+  <div class="nexora-subtitle">
+    GLOBAL DIGITAL MARKETPLACE
+  </div>
+  <p style="color:#B9B5D8;margin-top:18px">
+    Yeni nesil küresel ticaret dünyasına hoş geldin.
+  </p>
+  <button class="nexora-enter" onclick="closeNexoraIntro()">
+    KEŞFETMEYE BAŞLA ✦
+  </button>
+</div>
+  <script>
+function closeNexoraIntro(){
+  const intro=document.getElementById("nexoraIntro");
+  if(!intro) return;
+
+  intro.classList.add("hide");
+  localStorage.setItem("nexoraVisited","yes");
+}
+
+(function(){
+  const intro=document.getElementById("nexoraIntro");
+  if(!intro) return;
+
+  const visited=localStorage.getItem("nexoraVisited");
+
+  if(visited){
+    intro.classList.add("hide");
+  }else{
+    setTimeout(closeNexoraIntro,7000);
+  }
+})();
+  </script>
 </body>
 </html>
