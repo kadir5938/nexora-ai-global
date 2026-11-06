@@ -1412,18 +1412,13 @@ startApp();
 </div>
   <script>
 <script>
-function closeNexoraIntro(){
-  const intro=document.getElementById("nexoraIntro");
-  if(!intro) return;
+window.closeNexoraIntro = function(){
+  const intro = document.getElementById("nexoraIntro");
+  if (!intro) return;
 
   intro.classList.add("hide");
-  localStorage.setItem("nexoraVisited","yes");
-}
-
-(function(){
-  const intro=document.getElementById("nexoraIntro");
-  if(!intro) return;
-
+  localStorage.setItem("nexoraVisited", "yes");
+};
   // Açılış ekranını doğrudan sayfanın gövdesine taşı
   document.body.appendChild(intro);
 
