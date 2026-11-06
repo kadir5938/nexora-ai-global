@@ -1428,6 +1428,8 @@ startApp();
 </div>
   <script>
     
+
+<script>
 window.closeNexoraIntro = function(){
   const intro = document.getElementById("nexoraIntro");
   if (!intro) return;
@@ -1438,6 +1440,7 @@ window.closeNexoraIntro = function(){
     localStorage.setItem("nexoraVisited", "yes");
   } catch(e) {}
 };
+
 (function(){
   const intro = document.getElementById("nexoraIntro");
   if (!intro) return;
@@ -1453,15 +1456,20 @@ window.closeNexoraIntro = function(){
     zIndex: "2147483647",
     display: "flex"
   });
-  
-  const visited = localStorage.getItem("nexoraVisited") === "yes";
-intro.classList.remove("hide");
+
+  let visited = false;
+
+  try {
+    visited = localStorage.getItem("nexoraVisited") === "yes";
+  } catch(e) {}
+
+  intro.classList.remove("hide");
+
   if (visited) {
     intro.classList.add("short-intro");
     setTimeout(window.closeNexoraIntro, 1800);
   } else {
     intro.classList.remove("short-intro");
-    setTimeout(window.closeNexoraIntro, 7000);
   }
 })();
 </script>
