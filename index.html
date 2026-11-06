@@ -1396,6 +1396,22 @@ startApp();
     box-shadow: 0 0 28px rgba(56,189,248,.75);
   }
 }
+    
+#nexoraIntro.short-intro .nexora-subtitle,
+#nexoraIntro.short-intro p,
+#nexoraIntro.short-intro .nexora-enter {
+  display: none !important;
+}
+
+#nexoraIntro.short-intro .nexora-logo {
+  font-size: 48px;
+  animation: nexoraPulse .7s infinite alternate;
+}
+
+#nexoraIntro.short-intro .nexora-line {
+  width: 100px;
+  margin: 16px auto;
+}
   </style>
 <div id="nexoraIntro">
   <div class="nexora-logo">NEXORA</div>
@@ -1435,9 +1451,17 @@ window.closeNexoraIntro = function(){
     display: "flex"
   });
 
+  const visited = localStorage.getItem("nexoraVisited");
+
   intro.classList.remove("hide");
 
-  setTimeout(window.closeNexoraIntro, 7000);
+  if (visited === "yes") {
+    intro.classList.add("short-intro");
+    setTimeout(window.closeNexoraIntro, 1800);
+  } else {
+    intro.classList.remove("short-intro");
+    setTimeout(window.closeNexoraIntro, 7000);
+  }
 })();
 </script>
   
