@@ -1379,6 +1379,7 @@ startApp();
   </button>
 </div>
   <script>
+<script>
 function closeNexoraIntro(){
   const intro=document.getElementById("nexoraIntro");
   if(!intro) return;
@@ -1391,9 +1392,24 @@ function closeNexoraIntro(){
   const intro=document.getElementById("nexoraIntro");
   if(!intro) return;
 
+  // Açılış ekranını doğrudan sayfanın gövdesine taşı
+  document.body.appendChild(intro);
+
+  // Tam ekran görünmesini sağla
+  Object.assign(intro.style,{
+    position:"fixed",
+    inset:"0",
+    width:"100vw",
+    height:"100vh",
+    minHeight:"100dvh",
+    zIndex:"2147483647",
+    display:"flex"
+  });
+
   intro.classList.remove("hide");
+
   setTimeout(closeNexoraIntro,7000);
 })();
-  </script>
+</script>
 </body>
 </html>
