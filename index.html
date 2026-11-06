@@ -1436,16 +1436,11 @@ function finishNexoraIntro(){
   const intro = document.getElementById("nexoraIntro");
   if (!intro) return;
 
-  intro.classList.add("hide");
-
-  intro.style.opacity = "0";
-  intro.style.visibility = "hidden";
-  intro.style.pointerEvents = "none";
-  intro.style.display = "none";
-
   try {
     localStorage.setItem("nexoraVisited2026", "yes");
   } catch(e) {}
+
+  intro.remove();
 }
 window.closeNexoraIntro = function(){
   showNexoraShortIntro();
