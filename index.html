@@ -1458,8 +1458,7 @@ window.closeNexoraIntro = function(){
   let visited = false;
 
   try {
-    visited = localStorage.getItem("nexoraVisited") === "yes";
-  } catch(e) {}
+   const visited = false;
 
   intro.classList.remove("hide");
 
