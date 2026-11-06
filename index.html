@@ -1433,7 +1433,10 @@ window.closeNexoraIntro = function(){
   if (!intro) return;
 
   intro.classList.add("hide");
-  localStorage.setItem("nexoraVisited", "yes");
+
+  try {
+    localStorage.setItem("nexoraVisited", "yes");
+  } catch(e) {}
 };
 
 (function(){
@@ -1452,11 +1455,15 @@ window.closeNexoraIntro = function(){
     display: "flex"
   });
 
-  const visited = localStorage.getItem("nexoraVisited");
+  let visited = false;
+
+  try {
+    visited = localStorage.getItem("nexoraVisited") === "yes";
+  } catch(e) {}
 
   intro.classList.remove("hide");
 
-  if (visited === "yes") {
+  if (visited) {
     intro.classList.add("short-intro");
     setTimeout(window.closeNexoraIntro, 1800);
   } else {
