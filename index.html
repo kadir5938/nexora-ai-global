@@ -962,8 +962,9 @@ async function signOutUser(){
 async function loadOrders(){
   const buyerArea=$("myOrders");
   const sellerArea=$("sellerOrders");
+  const earningsArea=$("sellerEarnings");
 
-  if(!buyerArea||!sellerArea) return;
+  if(!buyerArea||!sellerArea||!earningsArea) return;
 
   if(!currentUser){
     buyerArea.innerHTML='<div class="empty-state">Siparişlerini görmek için giriş yap.</div>';
