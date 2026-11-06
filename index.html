@@ -1411,6 +1411,7 @@ startApp();
   </button>
 </div>
   <script>
+
 <script>
 window.closeNexoraIntro = function(){
   const intro = document.getElementById("nexoraIntro");
@@ -1419,24 +1420,28 @@ window.closeNexoraIntro = function(){
   intro.classList.add("hide");
   localStorage.setItem("nexoraVisited", "yes");
 };
-  // Açılış ekranını doğrudan sayfanın gövdesine taşı
+
+(function(){
+  const intro = document.getElementById("nexoraIntro");
+  if (!intro) return;
+
   document.body.appendChild(intro);
 
-  // Tam ekran görünmesini sağla
-  Object.assign(intro.style,{
-    position:"fixed",
-    inset:"0",
-    width:"100vw",
-    height:"100vh",
-    minHeight:"100dvh",
-    zIndex:"2147483647",
-    display:"flex"
+  Object.assign(intro.style, {
+    position: "fixed",
+    inset: "0",
+    width: "100vw",
+    height: "100vh",
+    minHeight: "100dvh",
+    zIndex: "2147483647",
+    display: "flex"
   });
 
   intro.classList.remove("hide");
 
-  setTimeout(closeNexoraIntro,7000);
+  setTimeout(window.closeNexoraIntro, 7000);
 })();
 </script>
+  
 </body>
 </html>
