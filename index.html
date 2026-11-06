@@ -1364,6 +1364,38 @@ startApp();
   from {width:0}
   to {width:180px}
 }
+
+#nexoraIntro .nexora-enter {
+  appearance: none;
+  margin-top: 35px;
+  padding: 16px 32px;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 50px;
+  color: #ffffff;
+  background: linear-gradient(110deg, #7c3aed, #4f46e5, #0284c7);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow:
+    0 0 18px rgba(139,92,246,.55),
+    0 0 38px rgba(56,189,248,.22);
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+  animation: nexoraButtonGlow 2s infinite alternate;
+}
+
+#nexoraIntro .nexora-enter:active {
+  transform: scale(.95);
+}
+
+@keyframes nexoraButtonGlow {
+  from {
+    box-shadow: 0 0 12px rgba(139,92,246,.4);
+  }
+  to {
+    box-shadow: 0 0 28px rgba(56,189,248,.75);
+  }
+}
   </style>
 <div id="nexoraIntro">
   <div class="nexora-logo">NEXORA</div>
