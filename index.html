@@ -1190,16 +1190,17 @@ function renderMyProducts(){
     button.addEventListener("click",()=>deleteProduct(button.dataset.deleteId));
   });
 }
-
 async function deleteProduct(id){
   if(!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+
   try{
     const {error}=await db.from("products").delete().eq("id",id);
     if(error) throw error;
-      await loadProducts();
-  await updateDashboard();
-  await loadOrders();
-  }
+
+    await loadProducts();
+    await updateDashboard();
+    await loadOrders();
+
     message("Ürün silindi.");
   }catch(error){
     message("Ürün silinemedi: "+error.message);
