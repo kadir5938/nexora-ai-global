@@ -1334,13 +1334,8 @@ function closeNexoraIntro(){
   const intro=document.getElementById("nexoraIntro");
   if(!intro) return;
 
-  const visited=localStorage.getItem("nexoraVisited");
-
-  if(visited){
-    intro.classList.add("hide");
-  }else{
-    setTimeout(closeNexoraIntro,7000);
-  }
+  intro.classList.remove("hide");
+  setTimeout(closeNexoraIntro,7000);
 })();
   </script>
 </body>
