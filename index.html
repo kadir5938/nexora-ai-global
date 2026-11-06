@@ -1454,9 +1454,8 @@ window.closeNexoraIntro = function(){
     zIndex: "2147483647",
     display: "flex"
   });
-
-  const visited = false;
-
+  
+  const visited = localStorage.getItem("nexoraVisited") === "yes";
   intro.classList.remove("hide");
 
   if (visited) {
