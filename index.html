@@ -1006,16 +1006,98 @@ async function loadOrders(){
   }
   }
 async function loadUser(){
-  if(!db||recoveryMode) return;
-  const {data,error}=await db.auth.getUser();
-  if(error) console.error(error);
-  currentUser=data?.user||null;
-  updateAccount();
-  if(currentUser) await loadMyStore();
-  else myStore=null;
-  await loadProducts();
-  await updateDashboard();
-}
+
+async function loadOrders(){
+  const buyerArea=$("myOrders");
+  const sellerArea=$("sellerOrders");
+  const earningsArea=$("sellerEarnings");
+
+  if(!buyerArea||!sellerArea||!earningsArea) return;
+
+  if(!currentUser){
+    buyerArea.innerHTML='<div class="empty-state">Siparişlerini görmek için giriş yap.</div>';
+    sellerArea.innerHTML='<div class="empty-state">Gelen satışlarını görmek için giriş yap.</div>';
+    earningsArea.innerHTML='<div class="empty-state">Kazanç bilgileri için giriş yap.</div>';
+    return;
+  }
+
+  buyerArea.innerHTML='<div class="empty-state">Siparişler yükleniyor...</div>';
+  sellerArea.innerHTML='<div class="empty-state">Satışlar yükleniyor...</div>';
+  earningsArea.innerHTML='<div class="empty-state">Kazançlar hesaplanıyor...</div>';
+
+  try{
+    const [buyerResult,sellerResult]=await Promise.all([
+      db.from("orders").select("*")
+        .eq("buyer_id",currentUser.id)
+        .order("created_at",{ascending:false}),
+
+      db.from("orders").select("*")
+        .eq("seller_id",currentUser.id)
+        .order("created_at",{ascending:false})
+    ]);
+
+    if(buyerResult.error) throw buyerResult.error;
+    if(sellerResult.error) throw sellerResult.error;
+
+    const buyerOrders=buyerResult.data||[];
+    const sellerOrders=sellerResult.data||[];
+
+    buyerArea.innerHTML=buyerOrders.length
+      ?buyerOrders.map(o=>orderCard(o,"buyer")).join("")
+      :'<div class="empty-state">Henüz siparişiniz bulunmuyor.</div>';
+
+    sellerArea.innerHTML=sellerOrders.length
+      ?sellerOrders.map(o=>orderCard(o,"seller")).join("")
+      :'<div class="empty-state">Henüz gelen satışınız bulunmuyor.</div>';
+
+    const totalSales=sellerOrders.reduce(
+      (sum,o)=>sum+(Number(o.subtotal)||0),0
+    );
+
+    const totalCommission=sellerOrders.reduce(
+      (sum,o)=>sum+(Number(o.commission_amount)||0),0
+    );
+
+    const totalEarnings=sellerOrders.reduce(
+      (sum,o)=>sum+(Number(o.seller_amount)||0),0
+    );
+
+    const money=value=>new Intl.NumberFormat("tr-TR",{
+      style:"currency",
+      currency:"TRY"
+    }).format(value);
+
+    earningsArea.innerHTML=`
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <h4>Toplam Satış</h4>
+          <strong>${money(totalSales)}</strong>
+        </div>
+        <div class="stat-card">
+          <h4>NEXORA Komisyonu</h4>
+          <strong>${money(totalCommission)}</strong>
+        </div>
+        <div class="stat-card">
+          <h4>Satıcı Hakedişi</h4>
+          <strong>${money(totalEarnings)}</strong>
+        </div>
+        <div class="stat-card">
+          <h4>Toplam Sipariş</h4>
+          <strong>${sellerOrders.length}</strong>
+        </div>
+      </div>
+      <p class="empty-state">
+        Hakediş tutarı hesaplanmıştır. Gerçek ödeme henüz yapılmamıştır.
+      </p>
+    `;
+
+  }catch(error){
+    buyerArea.innerHTML='<div class="empty-state">Siparişler yüklenemedi: '+escapeHTML(error.message)+'</div>';
+    sellerArea.innerHTML='<div class="empty-state">Satışlar yüklenemedi: '+escapeHTML(error.message)+'</div>';
+    earningsArea.innerHTML='<div class="empty-state">Kazançlar yüklenemedi: '+escapeHTML(error.message)+'</div>';
+  }
+  }
+  
   async function loadMyStore(){
   if(!currentUser){myStore=null;return}
   const {data,error}=await db.from("stores")
