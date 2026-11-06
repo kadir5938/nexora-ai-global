@@ -1308,6 +1308,63 @@ window.addEventListener("unhandledrejection",function(e){
 
 startApp();
 </script>
+  <style>
+#nexoraIntro {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  z-index: 999999 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 25px;
+  box-sizing: border-box;
+  background: radial-gradient(circle at center, #382078, #11102d 55%, #050713);
+  color: white;
+  transition: opacity .8s ease, visibility .8s ease;
+}
+
+#nexoraIntro.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#nexoraIntro .nexora-logo {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #c4b5fd;
+  animation: nexoraPulse 1.5s infinite alternate;
+}
+
+#nexoraIntro .nexora-line {
+  width: 180px;
+  height: 3px;
+  margin: 22px;
+  background: linear-gradient(90deg,#8b5cf6,#38bdf8);
+  animation: nexoraLine 1.5s ease;
+}
+
+#nexoraIntro .nexora-subtitle {
+  letter-spacing: 2px;
+  color: #ddd6fe;
+}
+
+@keyframes nexoraPulse {
+  from {transform:scale(.92);opacity:.65}
+  to {transform:scale(1.06);opacity:1}
+}
+
+@keyframes nexoraLine {
+  from {width:0}
+  to {width:180px}
+}
+  </style>
 <div id="nexoraIntro">
   <div class="nexora-logo">NEXORA</div>
   <div class="nexora-line"></div>
