@@ -928,36 +928,7 @@ async function signOutUser(){
     message("Çıkış hatası: "+error.message);
   }
 }
-  function orderCard(o,type){
-  const statusNames={
-    pending:"Beklemede",
-    processing:"Hazırlanıyor",
-    completed:"Tamamlandı",
-    cancelled:"İptal edildi"
-  };
-
-  const date=new Date(o.created_at).toLocaleString("tr-TR");
-  const amount=type==="buyer"?o.subtotal:o.seller_amount;
-
-  return `
-    <article class="product" style="padding:18px;margin-bottom:15px">
-      <div class="product-body">
-        <h3>${escapeHTML(o.product_name)}</h3>
-        <p class="small">Sipariş: ${escapeHTML(o.id)}</p>
-        <p class="small">Tarih: ${date}</p>
-        <p class="small">Adet: ${o.quantity}</p>
-        <div class="price">
-          ${Number(amount||0).toLocaleString("tr-TR",{minimumFractionDigits:2})} TL
-        </div>
-        <p class="small">Durum: ${statusNames[o.order_status]||escapeHTML(o.order_status)}</p>
-        ${type==="seller"?`
-          <p class="small">Platform komisyonu: ${Number(o.commission_amount||0).toFixed(2)} TL</p>
-        `:""}
-        <p class="small">Ödeme: ${o.payment_status==="demo_unpaid"?"Deneme, ödeme alınmadı":escapeHTML(o.payment_status)}</p>
-      </div>
-    </article>
-  `;
-}
+  
 function orderCard(o,type){
   const statusNames={
     pending:"Beklemede",
@@ -1009,7 +980,42 @@ function orderCard(o,type){
     </article>
   `;
 }
+async function updateSellerOrderStatus(button){
+  const card=button.closest("[data-order-card]");
+  const select=card?.querySelector("[data-order-status]");
+  const orderId=button.dataset.orderId;
+  const status=select?.value;
 
+  if(!currentUser){
+    message("Önce giriş yapmalısınız.");
+    return;
+  }
+
+  if(!orderId||!status){
+    message("Sipariş bilgileri eksik.");
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="Güncelleniyor...";
+
+  try{
+    const {error}=await db.rpc("update_seller_order_status",{
+      p_order_id:orderId,
+      p_status:status
+    });
+
+    if(error) throw error;
+
+    message("Sipariş durumu başarıyla güncellendi.");
+    await loadOrders();
+
+  }catch(error){
+    message("Durum güncellenemedi: "+error.message);
+    button.disabled=false;
+    button.textContent="Durumu Güncelle";
+  }
+}
 async function loadOrders(){
   const buyerArea=$("myOrders");
   const sellerArea=$("sellerOrders");
