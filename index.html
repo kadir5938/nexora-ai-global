@@ -958,7 +958,57 @@ async function signOutUser(){
     </article>
   `;
 }
+function orderCard(o,type){
+  const statusNames={
+    pending:"Beklemede",
+    processing:"Hazırlanıyor",
+    completed:"Tamamlandı",
+    cancelled:"İptal edildi"
+  };
 
+  const date=new Date(o.created_at).toLocaleString("tr-TR");
+  const amount=type==="buyer"?o.subtotal:o.seller_amount;
+
+  return `
+    <article class="product" style="padding:18px;margin-bottom:15px" data-order-card>
+      <div class="product-body">
+        <h3>${escapeHTML(o.product_name)}</h3>
+        <p class="small">Sipariş: ${escapeHTML(o.id)}</p>
+        <p class="small">Tarih: ${date}</p>
+        <p class="small">Adet: ${o.quantity}</p>
+
+        <div class="price">
+          ${Number(amount||0).toLocaleString("tr-TR",{minimumFractionDigits:2})} TL
+        </div>
+
+        <p class="small">
+          Durum: ${statusNames[o.order_status]||escapeHTML(o.order_status)}
+        </p>
+
+        ${type==="seller"?`
+          <p class="small">Platform komisyonu: ${Number(o.commission_amount||0).toFixed(2)} TL</p>
+
+          <label class="small">Sipariş durumunu değiştir:</label>
+          <select data-order-status style="width:100%;padding:12px;margin:8px 0">
+            <option value="processing">Hazırlanıyor</option>
+            <option value="completed">Tamamlandı</option>
+            <option value="cancelled">İptal edildi</option>
+          </select>
+
+          <button type="button"
+            onclick="updateSellerOrderStatus(this)"
+            data-order-id="${escapeHTML(o.id)}">
+            Durumu Güncelle
+          </button>
+        `:""}
+
+        <p class="small">
+          Ödeme: ${o.payment_status==="demo_unpaid"?"Deneme, ödeme alınmadı":escapeHTML(o.payment_status)}
+        </p>
+      </div>
+    </article>
+  `;
+}
 
 async function loadOrders(){
   const buyerArea=$("myOrders");
@@ -993,36 +1043,6 @@ async function loadOrders(){
     buyerArea.innerHTML=buyerOrders.length
       ?buyerOrders.map(o=>orderCard(o,"buyer")).join("")
       :'<div class="empty-state">Henüz siparişiniz bulunmuyor.</div>';
-
-    sellerArea.innerHTML=sellerOrders.length
-      ?sellerOrders.map(o=>orderCard(o,"seller")).join("")
-      :'<div class="empty-state">Henüz gelen satışınız bulunmuyor.</div>';
-
-    if(earningsArea){
-      const totalSales=sellerOrders.reduce((s,o)=>s+(Number(o.subtotal)||0),0);
-      const totalCommission=sellerOrders.reduce((s,o)=>s+(Number(o.commission_amount)||0),0);
-      const totalEarnings=sellerOrders.reduce((s,o)=>s+(Number(o.seller_amount)||0),0);
-
-      const money=value=>new Intl.NumberFormat("tr-TR",{
-        style:"currency",currency:"TRY"
-      }).format(value);
-
-      earningsArea.innerHTML=`
-        <div class="dashboard-grid">
-          <div class="stat-card"><h4>Toplam Satış</h4><strong>${money(totalSales)}</strong></div>
-          <div class="stat-card"><h4>NEXORA Komisyonu</h4><strong>${money(totalCommission)}</strong></div>
-          <div class="stat-card"><h4>Satıcı Hakedişi</h4><strong>${money(totalEarnings)}</strong></div>
-          <div class="stat-card"><h4>Toplam Sipariş</h4><strong>${sellerOrders.length}</strong></div>
-        </div>
-        <p class="empty-state">Hakediş hesaplanmıştır. Gerçek ödeme henüz yapılmamıştır.</p>
-      `;
-    }
-  }catch(error){
-    buyerArea.innerHTML='<div class="empty-state">Siparişler yüklenemedi: '+escapeHTML(error.message)+'</div>';
-    sellerArea.innerHTML='<div class="empty-state">Satışlar yüklenemedi: '+escapeHTML(error.message)+'</div>';
-    if(earningsArea) earningsArea.innerHTML='<div class="empty-state">Kazançlar yüklenemedi: '+escapeHTML(error.message)+'</div>';
-  }
-}
 
 async function loadUser(){
   if(!db||recoveryMode) return;
