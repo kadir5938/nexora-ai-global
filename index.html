@@ -1323,6 +1323,7 @@ function startApp(){
 
     setTimeout(async()=>{
       try{
+        console.log("loadUser kontrolü:", typeof loadUser);
         await loadUser();
         message("NEXORA bağlantısı başarılı!");
       }catch(error){
